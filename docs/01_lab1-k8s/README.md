@@ -871,7 +871,7 @@ spec:
           path: /var/log
 ```
 
-**Εκτέλεση του **DaemonSet**: Για να εκτελέσετε το DaemonSet, χρησιμοποιήστε την παρακάτω εντολή
+Εκτέλεση του **DaemonSet**: Για να εκτελέσετε το DaemonSet, χρησιμοποιήστε την παρακάτω εντολή
 
 ```bash
 kubectl apply -f fluentd-daemonset.yaml
