@@ -1,118 +1,86 @@
-**ΑΚΑΔΗΜΑΪΚΟ**** ****ΕΤΟΣ**** 2024-2025 **
-
-**ΕΑΡΙΝΟ**** ****ΕΞΑΜΗΝΟ**
-
-**ΜΑΘΗΜΑ: ****Νεφοϋπολογιστική**
-
-**Παραδείγματα χρήσης και ο****δηγός ****σ****ύνδεσης στο ****Kubernetes**** του Εργαστηρίου ****VDCLOUD**
 
 
+# Παραδείγματα χρήσης και οδηγός σύνδεσης στο Kubernetes του Εργαστηρίου VDCLOUD
 
 
+## Εισαγωγή
 
+Αυτός ο οδηγός παρέχει λεπτομερείς οδηγίες για τη σύνδεση στην υποδομή του εργαστηρίου VDCLOUD μέσω VPN, την εγκατάσταση των απαραίτητων εργαλείων, τη ρύθμιση του περιβάλλοντος εργασίας ενός τοπικού υπολογιστή και την εκτέλεση εργασιών Kubernetes (k8s). Το [Kubernetes (K8s)](https://kubernetes.io/) είναι μια ανοιχτού κώδικα πλατφόρμα για τη διαχείριση containerized εφαρμογών σε κλίμακα. Σκοπός του είναι να διευκολύνει τη διαχείριση, την αυτοματοποίηση και την κλιμάκωση εφαρμογών.
 
-
-Εισαγωγή
-
-Αυτός ο οδηγός παρέχει λεπτομερείς οδηγίες για τη σύνδεση στην υποδομή του εργαστηρίου VDCLOUD μέσω VPN, την εγκατάσταση των απαραίτητων εργαλείων, τη ρύθμιση του περιβάλλοντος εργασίας ενός τοπικού υπολογιστή και την εκτέλεση εργασιών Kubernetes (k8s). Το Kubernetes (K8s) είναι μια ανοιχτού κώδικα πλατφόρμα για τη διαχείριση containerized εφαρμογών σε κλίμακα. Σκοπός του είναι να διευκολύνει τη διαχείριση, την αυτοματοποίηση και την κλιμάκωση εφαρμογών.
-
-Θα λάβετε επίσης ένα email με δυο αρχεία ρυθμίσεων και ένα username που θα έχετε στην υποδομή. Στον παρακάτω οδηγό, όπου βλέπετε το **<****username****>** θα το αντικαθιστάτε με το όνομα χρήστη που λάβατε στο email σας.
+Θα λάβετε επίσης ένα email με δυο αρχεία ρυθμίσεων και ένα username που θα έχετε στην υποδομή. Στον παρακάτω οδηγό, όπου βλέπετε το **<username>** θα το αντικαθιστάτε με το όνομα χρήστη που λάβατε στο email σας.
 
 Το υλικό υπάρχει στο παρακάτω αποθετήριο
 
-
+https://github.com/ikons/cloud-uth
 
 Το οποίο μπορείτε να κατεβάσετε τοπικά μέσω της εντολής:
 
+```bash
 cd ~
-
 git clone https://github.com/ikons/cloud-uth.git
+```
 
 Η εντολή θα αντιγράψει τοπικά στον υπολογιστή σας όλο το αποθετήριο. Επειδή το αποθετήριο μπορεί να ενημερώνεται τακτικά, φροντίστε να το ενημερώνετε τακτικά, εκτελώντας τις παρακάτω εντολές:
 
+```bash
 cd cloud-uth
-
 git pull
+```
 
-Εγκατάσταση OpenVPN Client, kubectl και k9s
+## Εγκατάσταση OpenVPN Client, kubectl και k9s
 
-Για να συνδεθείτε στην υποδομή, εγκαταστήστε τον OpenVPN client από τον παρακάτω σύνδεσμο: 
+Για να συνδεθείτε στην υποδομή, εγκαταστήστε τον [OpenVPN client](https://openvpn.net/community-downloads/). 
 
 Αφού εγκαταστήσετε τον client, εισάγετε το αρχείο .ovpn που σας έχει αποσταλεί με e-mail και συνδεθείτε.
 
-**Εγκατάσταση ****kubectl**
+Εγκατάσταση **kubectl**
 
 Το kubectl είναι το εργαλείο γραμμής εντολών για τη διαχείριση Kubernetes clusters. Εγκαταστήστε το με τις παρακάτω εντολές σε ένα Linux μηχάνημα ή WSL:
 
+```bash
 # Εγκατάσταση βασικών πακέτων που απαιτούνται για πρόσβαση σε αποθετήρια HTTPS
-
-**sudo** apt-get install -y apt-transport-https ca-certificates curl gnupg
-
-
+sudo apt-get install -y apt-transport-https ca-certificates curl gnupg
 
 # Λήψη και αποθήκευση του δημόσιου κλειδιού για το Kubernetes αποθετήριο
-
-**curl** -fsSL https**://**pkgs.k8s.io**/**core**:/**stable**:/**v1.32**/**deb**/**Release.key **|** **sudo** gpg --dearmor -o **/**etc**/**apt**/**keyrings**/**kubernetes-apt-keyring.gpg
-
-
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
 # Ρύθμιση σωστών δικαιωμάτων πρόσβασης στο κλειδί
-
-**sudo** chmod 644 **/**etc**/**apt**/**keyrings**/**kubernetes-apt-keyring.gpg
-
-
+sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
 # Προσθήκη του Kubernetes αποθετηρίου στη λίστα των sources του apt
-
-**echo** 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' **|** **sudo** tee **/**etc**/**apt**/**sources.list.d**/**kubernetes.list
-
-
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
 # Ρύθμιση σωστών δικαιωμάτων πρόσβασης στο αρχείο sources
-
-**sudo** chmod 644 **/**etc**/**apt**/**sources.list.d**/**kubernetes.list
-
-
+sudo chmod 644 /etc/apt/sources.list.d/kubernetes.list
 
 # Ενημέρωση της λίστας πακέτων του apt
-
-**sudo** apt-get update
-
-
+sudo apt-get update
 
 # Εγκατάσταση του εργαλείου kubectl
-
-**sudo** apt-get install -y kubectl
-
-
+sudo apt-get install -y kubectl
 
 # Δημιουργία του καταλόγου ~/.kube όπου αποθηκεύεται το αρχείο config
+mkdir ~/.kube
+```
 
-**mkdir** **~/.**kube
+Εισάγετε το αρχείο `config` που σας έχει αποσταλεί με e-mail στην τοποθεσία `~/.kube/config` για να μπορεί το εργαλείο `kubectl` να συνδεθεί με την υποδομή k8s.
 
-Εισάγετε το αρχείο config που σας έχει αποσταλεί με e-mail στην τοποθεσία ~/.kube/config για να μπορεί το εργαλείο kubectl να συνδεθεί με την υποδομή k8s.
+Για να το κάνετε αυτό, θα πρέπει να αντιγράψετε το αρχείο `config` από την τοποθεσία του συστήματος αρχείων του host υπολογιστή σας που αρχικά το κατεβάσατε (δηλαδή windows) στον κατάλογο `~/.kube` του Linux WSL.
 
-Για να το κάνετε αυτό, θα πρέπει να αντιγράψετε το αρχείο config από την τοποθεσία του συστήματος αρχείων του host υπολογιστή σας που αρχικά το κατεβάσατε (δηλαδή windows) στον κατάλογο ~/.kube του Linux WSL.
+ Έστω ότι έχετε κατεβάσει το αρχείο `config` στον κατάλογο `Downloads` (Λήψεις) του χρήστη των windows. 
 
- Έστω ότι έχετε κατεβάσει το αρχείο config στον κατάλογο Downloads (Λήψεις) του χρήστη των windows. 
+Για να το αντιγράψετε στην σωστή θέση, πρέπει να εκτελέσετε τις παρακάτω εντολές στο WSL Linux. Θα αντικαταστήσετε το **<username>** με το όνομα χρήστη των windows της δικής σας εγκατάστασης. Για παράδειγμα, στην δική μου περίπτωση είναι `/mnt/c/Users/**ikons**/Downloads/config`
 
-Για να το αντιγράψετε στην σωστή θέση, πρέπει να εκτελέσετε τις παρακάτω εντολές στο WSL Linux. Θα αντικαταστήσετε το **<****username****>** με το όνομα χρήστη των windows της δικής σας εγκατάστασης. Για παράδειγμα, στην δική μου περίπτωση είναι /mnt/c/Users/**ikons**/Downloads/config
-
+```bash
 # Πηγαίνουμε στον προσωπικό κατάλογο του χρήστη
-
-**cd**
-
-
+cd
 
 # Δημιουργούμε τον κατάλογο .kube (αν δεν υπάρχει)
-
-**mkdir** **.**kube
-
-
+mkdir .kube
 
 # Αντιγραφή του αρχείου config από το σύστημα αρχείων των Windows στο WSL
-
-**cp** **/**mnt**/**c**/**Users**/<****username****>/**Downloads**/**config **~****/.**kube**/**config
+cp /mnt/c/Users/<username>/Downloads/config ~/.kube/config
+```
 
 Ένας άλλος τρόπος να το κάνετε είναι μέσω του Windows explorer επιλέγοντας το Linux folder:
 
@@ -122,63 +90,67 @@ git pull
 
 Το k9s είναι ένα εργαλείο για την παρακολούθηση και τη διαχείριση Kubernetes clusters. Εγκαταστήστε το ως εξής:
 
-**wget** https**://**github.com**/**derailed**/**k9s**/**releases**/**download**/**v0.40.10**/**k9s_linux_amd64.deb
+```bash
+wget https://github.com/derailed/k9s/releases/download/v0.40.10/k9s_linux_amd64.deb
+sudo dpkg -i k9s_linux_amd64.deb
+echo "export KUBE_EDITOR=nano" >> ~/.bashrc
+```
 
-**sudo** dpkg -i k9s_linux_amd64.deb
 
-**echo** "export KUBE_EDITOR=nano" **>>** **~****/.**bashrc
-
-Το εργαλείο k9s χρησιμοποιεί και αυτό το αρχείο ρυθμίσεων ~/.kube/config.
+Το εργαλείο k9s χρησιμοποιεί και αυτό το αρχείο ρυθμίσεων `~/.kube/config`.
 
 **Παρακολούθηση Εκτέλεσης μέσω k9s**
 
 Για να παρακολουθήσετε την εκτέλεση της εργασίας που μόλις υποβάλλατε, χρησιμοποιήστε το k9s:
 
+```bash
 k9s
+```
 
 **Παραδείγματα χρήσης**
 
-**Εμφάνιση των ****pods**:
+**Εμφάνιση των pods**:
 
+```bash
 :pods
+```
 
-**Προβολή των ****logs**** ενός ****pod**:
+**Προβολή των logs ενός pod**:
 
+```bash
 l
+```
 
-**Έλεγχος κατάστασης ενός ****pod**:
+**Έλεγχος κατάστασης ενός pod**:
 
+```bash
 d
+```
 
-Συγγραφή Manifest και Εκτέλεση με kubectl
+## Συγγραφή Manifest και Εκτέλεση με kubectl
 
-Τα **manifest** είναι αρχεία YAML που περιγράφουν τους πόρους του Kubernetes. Μπορείς να δημιουργήσεις και να εφαρμόσεις αυτά τα αρχεία χρησιμοποιώντας την εντολή kubectl apply.
+Τα **manifest** είναι αρχεία YAML που περιγράφουν τους πόρους του Kubernetes. Μπορείς να δημιουργήσεις και να εφαρμόσεις αυτά τα αρχεία χρησιμοποιώντας την εντολή `kubectl apply`.
 
 Περιηγηθείτε στον κατάλογο του παραδείγματος
 
+```bash
 cd ~/cloud-uth/code/03_manifest
+```
 
-**Παράδειγμα**** ****manifest**** ****για**** ****Pod****:**
+**Παράδειγμα manifest για Pod:**
 
-**apiVersion**: v1
-
-**kind**: Pod
-
-**metadata**:
-
-**  name**: nginx
-
-**spec**:
-
-**  containers**:
-
-**  - name**: nginx
-
-**    image**: nginx:latest
-
-**    ports**:
-
-**    ****- ****containerPort**: 80
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:latest
+    ports:
+    - containerPort: 80
+```
 
 Για να δημιουργήσεις το παραπάνω Pod:
 
@@ -194,53 +166,53 @@ kubectl get pod nginx -o wide
 
 Λογικά θα δείτε κάτι της μορφής
 
+```
 NAME    READY   STATUS    RESTARTS   AGE     IP               NODE              NOMINATED NODE   READINESS GATES
 
 nginx   1/1     Running   0          7h34m   10.233.101.168   source-code-pc6   <none>           <none>
+```
 
 Μέσω της διεύθυνσης IP μπορείτε να ανοίξετε το pod και να δείτε την σελίδα hello-world του nginx στον browser σας;:
 
 http:// 10.233.101.168
 
-**🧹**** Καθαρισμός της υποδομής (****Cleanup****)**
+**🧹 Καθαρισμός της υποδομής (Cleanup)**
 
 Αφού επιβεβαιώσετε ότι το Pod nginx εκτελείται σωστά και εμφανίζει την προεπιλεγμένη σελίδα του nginx, μπορείτε να το αφαιρέσετε από τον cluster σας με την παρακάτω εντολή:
 
-# Διαγραφή του Pod
-
 ```bash
+# Διαγραφή του Pod
 kubectl delete -f nginx-pod.yaml
 ```
 
-Αποθηκευτικός χώρος περιεκτών με χρήση storage classes, persistent volume claims και persistent volumes
+## Αποθηκευτικός χώρος περιεκτών με χρήση storage classes, persistent volume claims και persistent volumes
 
-**Μη Μόνιμη Αποθήκευση (****Ephemeral**** ****Storage****):** Τα Pods στο Kubernetes από προεπιλογή δεν έχουν μόνιμη αποθήκευση. Αν αποθηκεύσετε δεδομένα σε ένα Pod, αυτά τα δεδομένα θα χαθούν μόλις το Pod διαγραφεί ή επανεκκινηθεί. Αυτό συμβαίνει επειδή τα δεδομένα αποθηκεύονται στο filesystem του container, το οποίο είναι προσωρινό.
+**Μη Μόνιμη Αποθήκευση (Ephemeral Storage):** Τα Pods στο Kubernetes από προεπιλογή δεν έχουν μόνιμη αποθήκευση. Αν αποθηκεύσετε δεδομένα σε ένα Pod, αυτά τα δεδομένα θα χαθούν μόλις το Pod διαγραφεί ή επανεκκινηθεί. Αυτό συμβαίνει επειδή τα δεδομένα αποθηκεύονται στο filesystem του container, το οποίο είναι προσωρινό.
 
-**Μόνιμη Αποθήκευση με ****Persistent**** ****Volumes**** (****PVs****)****,**** ****Persistent**** ****Volume**** ****Claims**** (****PVCs****)**** ****και ****StorageClass****: **Το Kubernetes εισάγει το concept των Persistent Volumes (PVs) και των Persistent Volume Claims (PVCs) για να παρέχει μόνιμη αποθήκευση σε Pods.
+**Μόνιμη Αποθήκευση με Persistent Volumes (PVs), Persistent Volume Claims (PVCs) και StorageClass**: Το Kubernetes εισάγει το concept των Persistent Volumes (PVs) και των Persistent Volume Claims (PVCs) για να παρέχει μόνιμη αποθήκευση σε Pods.
 
-**Persistent**** ****Volume**** (PV):** Είναι ένας πόρος αποθήκευσης που είναι αποδεσμευμένος από τα Pods και διαχειρίζεται από τον διαχειριστή του cluster. Τα PVs μπορεί να είναι φυσικές συσκευές αποθήκευσης (όπως disk volumes σε υποδομές cloud) ή abstractions που επιτρέπουν τη σύνδεση με άλλους τύπους αποθηκευτικών συστημάτων.
-
-**Persistent**** ****Volume**** ****Claim**** (PVC):** Είναι ένας τρόπος για τον χρήστη να ζητήσει συγκεκριμένο τύπο ή μέγεθος αποθηκευτικού χώρου. Τα PVCs είναι συνήθως ο τρόπος με τον οποίο τα Pods αποκτούν πρόσβαση σε ένα PV.
-
-**StorageClass****:** Με την εισαγωγή των StorageClasses, το Kubernetes επιτρέπει τη δημιουργία αποθηκευτικών πόρων (PVs) δυναμικά και με βάση τις ανάγκες των PVCs. Το StorageClass καθορίζει τις ρυθμίσεις αποθήκευσης, όπως ο τύπος αποθήκευσης (π.χ., SSD, HDD) και άλλες παραμέτρους, όπως το επιθυμητό επίπεδο απόδοσης.
+- **Persistent Volume (PV):** Είναι ένας πόρος αποθήκευσης που είναι αποδεσμευμένος από τα Pods και διαχειρίζεται από τον διαχειριστή του cluster. Τα PVs μπορεί να είναι φυσικές συσκευές αποθήκευσης (όπως disk volumes σε υποδομές cloud) ή abstractions που επιτρέπουν τη σύνδεση με άλλους τύπους αποθηκευτικών συστημάτων.
+- **Persistent Volume Claim (PVC):** Είναι ένας τρόπος για τον χρήστη να ζητήσει συγκεκριμένο τύπο ή μέγεθος αποθηκευτικού χώρου. Τα PVCs είναι συνήθως ο τρόπος με τον οποίο τα Pods αποκτούν πρόσβαση σε ένα PV.
+- **StorageClass:** Με την εισαγωγή των StorageClasses, το Kubernetes επιτρέπει τη δημιουργία αποθηκευτικών πόρων (PVs) δυναμικά και με βάση τις ανάγκες των PVCs. Το StorageClass καθορίζει τις ρυθμίσεις αποθήκευσης, όπως ο τύπος αποθήκευσης (π.χ., SSD, HDD) και άλλες παραμέτρους, όπως το επιθυμητό επίπεδο απόδοσης.
 
 Για παράδειγμα, με την παρακάτω εντολή (εκτελείται μόνο με δικαιώματα διαχειριστή, όχι με απλό χρήστη)
 
+```
 ikons@source-code-master:~$ kubectl get storageclass
 
-
-
 NAME                   PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+local-path (default)   rancher.io/local-path   Delete          WaitForFirstConsumer   false                  44d
+```
 
-**local-path** (default)   rancher.io/local-path   Delete          WaitForFirstConsumer   false                  44d
+βλέπουμε εάν υπάρχει κάποιο storage class που μπορεί να μας προσφέρει αποθηκευτικό χώρο. Η πληροφορία που παίρνουμε είναι ότι το Kubernetes cluster μας χρησιμοποιεί το StorageClass local-path, το οποίο παρέχεται από το rancher.io/local-path provisioner και έχει πολιτική ανακαίνισης (`reclaimPolicy`) Delete. Επίσης, χρησιμοποιεί το `WaitForFirstConsumer` για το `volumeBindingMode`, το οποίο σημαίνει ότι το PV θα δημιουργηθεί μόνο όταν υπάρξει ένα Pod που θα το ζητήσει.
 
-βλέπουμε εάν υπάρχει κάποιο storage class που μπορεί να μας προσφέρει αποθηκευτικό χώρο. Η πληροφορία που παίρνουμε είναι ότι το Kubernetes cluster μας χρησιμοποιεί το StorageClass **local****-****path**, το οποίο παρέχεται από το **rancher****.****io****/****local****-****path** provisioner και έχει πολιτική ανακαίνισης (reclaimPolicy) Delete. Επίσης, χρησιμοποιεί το WaitForFirstConsumer για το volumeBindingMode, το οποίο σημαίνει ότι το PV θα δημιουργηθεί μόνο όταν υπάρξει ένα Pod που θα το ζητήσει.
-
-**Δημιουργί****α Persistent Volume Claim (PVC) ****με**** ****το**** local-path ****StorageClass**
+Δημιουργία Persistent Volume Claim (PVC) 
 
 Περιηγηθείτε στον κατάλογο του παραδείγματος
 
+```bash
 cd ~/cloud-uth/code/04_pvc_pv
+```
 
 Αρχικά, χρειάζεται το YAML αρχείο για το PVC που θα χρησιμοποιεί το υπάρχον **local****-****path** StorageClass. Το αρχείο nginx-pvc.yaml έχει τα εξής:
 
