@@ -740,7 +740,7 @@ spec:
           storage: 1Gi
 ```
 
-**Εκτέλεση του **StatefulSet**
+**Εκτέλεση του StatefulSet**
 
 ```bash
 kubectl apply -f statefulset.yaml
@@ -885,7 +885,7 @@ kubectl get pods -o wide
 
 Θα παρατηρήσετε ότι υπάρχει ένα Fluentd Pod σε κάθε worker node του cluster.
 
-**Συλλογή και εκτύπωση μετρικών με **Fluentd**
+**Συλλογή και εκτύπωση μετρικών με Fluentd**
 
 Μπορούμε να χρησιμοποιήσουμε το Fluentd για τη συλλογή μετρικών από όλα τα Pods και τους κόμβους του cluster.
 
@@ -1182,6 +1182,7 @@ cd ~/cloud-uth/code/11-web-pgsql-demo
 Αυτές οι τιμές προέρχονται από:
 
 `02-configmap.yaml` → `username`, `dbname`
+
 `01-secret.yaml` → `password`
 
 Αν το PersistentVolumeClaim είναι **καινούργιο** (άδειος δίσκος), ο PostgreSQL container:
@@ -1302,7 +1303,7 @@ kubectl apply -f 08-webserver-service.yaml
 
 Πλέον, έχει σηκωθεί το pod και το service είναι διαθέσιμο, μπορείτε να ανοίξετε την παρακάτω σελίδα:
 
-http://webserver-service.ikons-priv.svc.cluster.local/
+http://webserver-service.**ikons**-priv.svc.cluster.local/
 
 Ή μπορείτε να τρέξετε από το command line την παρακάτω εντολή:
 
