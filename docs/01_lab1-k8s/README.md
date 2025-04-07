@@ -924,27 +924,24 @@ kubectl delete -f fluentd-daemonset.yaml
 
 Περιηγηθείτε στον κατάλογο του παραδείγματος
 
+```bash
 cd ~/cloud-uth/code/09_Secrets
+```
 
-**Βήμα 1: Δημιουργία του ****Secret**
+**Βήμα 1: Δημιουργία του Secret**
 
 Δημιουργούμε ένα Secret που περιέχει τα credentials (για παράδειγμα, για μια βάση δεδομένων):
 
-**apiVersion**: v1
-
-**kind**: Secret
-
-**metadata**:
-
-**  name**: db-credentials
-
-**type**: Opaque
-
-**data**:
-
-**  username**: cG9zdGdyZXM=      # "postgres" σε base64
-
-**  password**: c3VwZXJzZWNyZXQ=  # "supersecret" σε base64
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-credentials
+type: Opaque
+data:
+  username: cG9zdGdyZXM=      # "postgres" σε base64
+  password: c3VwZXJzZWNyZXQ=  # "supersecret" σε base64
+```
 
 Για να δημιουργήσεις το Secret:
 
@@ -958,43 +955,30 @@ kubectl apply -f db-credentials.yaml
 kubectl get secrets
 ```
 
-**Βήμα**** 2: ****Χρήση**** ****του**** ****Secret**** ****μέσω**** ****Volume**
+**Βήμα 2: Χρήση του Secret μέσω Volume**
 
-Ακολουθεί ένα παράδειγμα Pod, όπου το Secret γίνεται mount ως volume. Η εφαρμογή μπορεί να διαβάζει τα credentials από τα αρχεία /etc/db-credentials/username και /etc/db-credentials/password:
+Ακολουθεί ένα παράδειγμα Pod, όπου το Secret γίνεται mount ως volume. Η εφαρμογή μπορεί να διαβάζει τα credentials από τα αρχεία `/etc/db-credentials/username` και `/etc/db-credentials/password`:
 
-**apiVersion**: v1
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app-with-db
+spec:
+  containers:
+  - name: my-app
+    image: my-app-image
+    volumeMounts:
+    - name: secret-volume
+      mountPath: "/etc/db-credentials"
+      readOnly: true
+  volumes:
+  - name: secret-volume
+    secret:
+      secretName: db-credentials
+```
 
-**kind**: Pod
-
-**metadata**:
-
-**  name**: app-with-db
-
-**spec**:
-
-**  containers**:
-
-**  - name**: my-app
-
-**    image**: my-app-image
-
-**    ****volumeMounts**:
-
-**    - name**: secret-volume
-
-**      ****mountPath**: "/etc/db-credentials"
-
-**      ****readOnly**:** true**
-
-**  volumes**:
-
-**  - name**: secret-volume
-
-**    secret**:
-
-**      ****secretName**: db-credentials
-
-Το Kubernetes θα δημιουργήσει αυτόματα αρχεία username και password μέσα στον κατάλογο /etc/db-credentials, τα οποία η εφαρμογή μπορεί να διαβάσει ως απλά αρχεία κειμένου.
+Το Kubernetes θα δημιουργήσει αυτόματα αρχεία `username` και `password` μέσα στον κατάλογο `/etc/db-credentials`, τα οποία η εφαρμογή μπορεί να διαβάσει ως απλά αρχεία κειμένου.
 
 Για να δημιουργήσεις το Pod:
 
@@ -1002,19 +986,27 @@ kubectl get secrets
 kubectl apply -f app-with-db.yaml
 ```
 
-Μέσω k9s πάρε κονσόλα (πάτα s στο pod που δημιουργήθηκε) και τρέξε:
+Μέσω k9s πάρε κονσόλα (πάτα `s` στο pod που δημιουργήθηκε) και τρέξε:
 
-root@app-with-db:/# cat /etc/db-credentials/username; echo
-
+```bash
+cat /etc/db-credentials/username; echo
+```
+Θα δεις:
+```
 postgres
-
-root@app-with-db:/# cat /etc/db-credentials/password; echo
-
+```
+και
+```bash
+cat /etc/db-credentials/password; echo
+```
+θα δεις
+```
 supersecret
+```
 
-όπου μπορείς να δεις τα στοιχεία που περάσανε από το k8s στο pod και είναι διαθέσιμα. Πάτα Ctrl+d για να αποσυνδεθείς από το pod και μετά Ctrl+c για να αποσυνδεθείς από το k9s.
+όπου μπορείς να δεις τα στοιχεία που περάσανε από το k8s στο pod και είναι διαθέσιμα. Πάτα `Ctrl+d` για να αποσυνδεθείς από το pod και μετά `Ctrl+c` για να αποσυνδεθείς από το k9s.
 
-**🧹**** Καθαρισμός της υποδομής (****Cleanup****)**
+**🧹 Καθαρισμός της υποδομής (Cleanup)**
 
 Για να καθαρίσετε το pod και τα secrets και να προχωρήσετε στο παρακάτω παράδειγμα, τρέξτε
 
@@ -1022,13 +1014,15 @@ supersecret
 kubectl delete -f .
 ```
 
-Προσοχή: φροντίστε να βρίσκεστε στον κατάλογο 09_Secrets όταν εκτελέσετε την εντολή delete
+**Προσοχή:** φροντίστε να βρίσκεστε στον κατάλογο `09_Secrets` όταν εκτελέσετε την εντολή delete
 
 Κατόπιν, βγείτε από τον κατάλογο.
 
+```bash
 cd ..
+```
 
-ConfigMaps
+## 10. ConfigMaps
 
 Τα **ConfigMaps** χρησιμοποιούνται στο Kubernetes για την αποθήκευση μη-ευαίσθητων παραμέτρων διαμόρφωσης, όπως το όνομα χρήστη, οι διευθύνσεις υπηρεσιών, τα URLs ή οποιαδήποτε ρύθμιση της εφαρμογής που δεν θεωρείται μυστική.
 
