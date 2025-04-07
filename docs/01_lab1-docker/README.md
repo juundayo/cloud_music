@@ -1,26 +1,20 @@
-**ΑΚΑΔΗΜΑΪΚΟ**** ****ΕΤΟΣ**** 2024-2025 **
 
-**ΕΑΡΙΝΟ**** ****ΕΞΑΜΗΝΟ**
-
-**ΜΑΘΗΜΑ: ****Νεφοϋπολογιστική**
-
-**Παραδείγματα χρήσης ****docker containers**
+# Παραδείγματα χρήσης docker containers
 
 
+## Εισαγωγή
 
-**Εισαγωγή**
+Αυτός ο οδηγός θα σας βοηθήσει να μάθετε τα βασικά του **Docker** και να εκτελέσετε **απλά** και **πιο σύνθετα** παραδείγματα.
 
-Αυτός ο οδηγός θα σας βοηθήσει να μάθετε τα βασικά του **Docker**** **και να εκτελέσετε **απλά** και **πιο σύνθετα** παραδείγματα.
+## Εκτέλεση Βασικών Εντολών Docker
 
-**Εκτέλεση**** Βα****σικών**** ****Εντολών**** Docker**
-
-**Δοκιμή**** ****του**** Docker**
+**Δοκιμή του Docker**
 
 ```bash
 docker run hello-world
 ```
 
-Αυτό θα κατεβάσει και θα εκτελέσει το κοντέινερ hello-world.
+Αυτό θα κατεβάσει και θα εκτελέσει το κοντέινερ `hello-world`.
 
 **Εκτέλεση ****Ubuntu**** κοντέινερ με ****διαδραστική**** (****interactive****)**** λειτουργία**
 
@@ -28,11 +22,11 @@ docker run hello-world
 docker run -it ubuntu bash
 ```
 
--it: Ενεργοποιεί τη διαδραστική λειτουργία, επιστρέφει δηλαδή στον χρήστη κονσόλα τερματικού στον περιέκτη που ξεκίνησε.
+`-it`: Ενεργοποιεί τη διαδραστική λειτουργία, επιστρέφει δηλαδή στον χρήστη κονσόλα τερματικού στον περιέκτη που ξεκίνησε.
 
-Μπορείτε να εκτελέσετε εντολές όπως ls, pwd, exit.
+Μπορείτε να εκτελέσετε εντολές όπως `ls`, `pwd`, `exit`.
 
-**Προ****βολή ****τρεχόντων**** ****κοντέινερ**
+Προβολή τρεχόντων κοντέινερ
 
 ```bash
 docker ps
@@ -44,127 +38,108 @@ docker ps
 docker ps -a
 ```
 
-**Δι****αγραφή ****κοντέινερ**
+Διαγραφή κοντέινερ
 
 ```bash
 docker rm <container_id>
 ```
 
-**Δι****αγραφή ****εικόν****ας Docker**
+Διαγραφή εικόνας Docker
 
 ```bash
 docker rmi <image_id>
 ```
 
-**Εκτέλεση Ενός Απλού ****Web**** ****Server**** με ****Docker**
+## Εκτέλεση Ενός Απλού Web Server με Docker
 
-**Εκκίνηση**** ****ενός**** Nginx ****κοντέινερ**
+Εκκίνηση ενός Nginx κοντέινερ
 
 ```bash
 docker run -d -p 8080:80 nginx
 ```
 
--d: Εκτελείται στο παρασκήνιο.
+`-d`: Εκτελείται στο παρασκήνιο.
 
--p 8080:80: Χαρτογραφεί τη **θύρα 8080 του ****host** στη **θύρα 80 του κοντέινερ**.
+`-p 8080:80`: Χαρτογραφεί τη θύρα **8080** του **host** στη **θύρα 80 του κοντέινερ**.
 
-**Δοκιμή στο πρόγραμμα περιήγησης**
+Δοκιμή στο πρόγραμμα περιήγησης
 Ανοίξτε το:
 
 http://localhost:8080
 
 Θα δείτε την προεπιλεγμένη σελίδα του Nginx.
 
-**Παράδειγμα ****1****: Δημιουργία νέου ****Docker**** κοντέινερ με προσθήκη αρχείων**
+## Παράδειγμα 1: Δημιουργία νέου Docker κοντέινερ με προσθήκη αρχείων
 
-Σε αυτό το παράδειγμα, θα φτιάξουμε ένα **custom**** κοντέινερ** με βάση το **Ubuntu**, το οποίο θα περιέχει ένα απλό **script**** σε ****Bash** και θα το εκτελεί κατά την εκκίνηση.
+## Σε αυτό το παράδειγμα, θα φτιάξουμε ένα custom κοντέινερ με βάση το Ubuntu, το οποίο θα περιέχει ένα απλό script σε Bash και θα το εκτελεί κατά την εκκίνηση.
 
 Δημιουργία φακέλου εργασίας
 
 Αρχικά, δημιουργούμε έναν νέο φάκελο για το project:
 
-**mkdir** **~/**docker-custom-container
+```bash
+mkdir ~/docker-custom-container
+cd ~/docker-custom-container
+```
 
-**cd** **~/**docker-custom-container
-
-
-
-Δημιουργία αρχείου script.sh
+Δημιουργία αρχείου `script.sh`
 
 Αυτό το script θα τυπώνει ένα μήνυμα κάθε 5 δευτερόλεπτα.
 
+```bash
 nano script.sh
+```
 
 Προσθέστε το παρακάτω περιεχόμενο:
 
+```nano
 #!/bin/bash
+while true; do
+    echo "Το Docker κοντέινερ τρέχει! $(date)"
+    sleep 5
+done
+```
 
+Αποθηκεύστε το (`CTRL` + `X`, μετά `Y` και `Enter`).
 
+**Δώστε εκτελέσιμα δικαιώματα στο script**
 
-**while** **true****;** **do**
+```bash
+chmod +x script.sh
+```
 
-    **echo** "Το Docker κοντέινερ τρέχει! $(date)"
-
-    **sleep** 5
-
-**done**
-
-
-Αποθηκεύστε το (CTRL + X, μετά Y και Enter).
-
-**Δώστε εκτελέσιμα δικαιώματα στο ****script****:**
-
-**chmod** **+**x script.sh
-
-
-
-**Δημιουργί****α ****Dockerfile**
+Δημιουργία **Dockerfile**
 
 Τώρα θα δημιουργήσουμε το **Dockerfile**, το οποίο περιγράφει το κοντέινερ μας.
 
+```bash
 nano Dockerfile
-
+```
 Επικολλήστε το εξής:
 
-# Χρησιμοποιούμε την εικόνα Ubuntu
-
 ```dockerfile
+# Χρησιμοποιούμε την εικόνα Ubuntu
 FROM ubuntu**:**latest
-```
-
-
 
 # Ορίζουμε τον maintainer
-
 LABEL maintainer**=**"example@example.com"
 
-
-
 # Ενημέρωση του συστήματος και εγκατάσταση του bash
-
 RUN apt-get update **&&** **apt-get** install -y bash
 
-
-
 # Αντιγραφή του script μέσα στο κοντέινερ
-
 COPY script.sh **/**script.sh
 
-
-
 # Ορισμός δικαιωμάτων εκτέλεσης στο script
-
 RUN chmod **+**x **/**script.sh
 
-
-
 # Εκτέλεση του script κατά την εκκίνηση του κοντέινερ
-
 CMD **[**"/script.sh"**]**
+```
 
-Αποθηκεύστε το αρχείο.
+Αποθηκεύστε το αρχείο με (`CTRL` + `X`, μετά `Y` και `Enter`).
 
-**Δημιουργί****α ****του**** Docker Image**
+Δημιουργία του Docker Image
 
 Τώρα θα φτιάξουμε την εικόνα Docker:
 
@@ -172,7 +147,7 @@ CMD **[**"/script.sh"**]**
 docker build -t my-custom-container .
 ```
 
-**Εκτέλεση**** ****του**** ****κοντέινερ**
+Εκτέλεση του κοντέινερ
 
 Εκτελέστε το κοντέινερ στο παρασκήνιο:
 
@@ -188,179 +163,137 @@ docker logs -f my-container
 
 Θα δείτε μηνύματα όπως:
 
-Το Docker κοντέινερ τρέχει! Tue Mar 5 12:00:00 UTC 2025
+> Το Docker κοντέινερ τρέχει! Tue Mar 5 12:00:00 UTC 2025
+> Το Docker κοντέινερ τρέχει! Tue Mar 5 12:00:05 UTC 2025
+> ...
 
-Το Docker κοντέινερ τρέχει! Tue Mar 5 12:00:05 UTC 2025
+Διαχείριση και καθαρισμός
 
-...
-
-**Δι****αχείριση και καθα****ρισμός**
-
-**Σταμάτημα του κοντέινερ:**
+Σταμάτημα του κοντέινερ
 
 ```bash
 docker stop my-container
 ```
 
-**Διαγραφή του κοντέινερ:**
+Διαγραφή του κοντέινερ
 
 ```bash
 docker rm my-container
 ```
 
-**Διαγραφή της εικόνας:**
+Διαγραφή της εικόνας:
 
 ```bash
 docker rmi my-custom-container
 ```
 
-**Παράδειγμα ****2****: ****Εκτέλεση Σύνθετου Παραδείγματος με ****Nginx**** και Πολλαπλούς ****Web**** ****Servers**
+## Παράδειγμα 2: Εκτέλεση Σύνθετου Παραδείγματος με Nginx και Πολλαπλούς Web Servers
 
-Θα δημιουργήσουμε ένα **Docker**** ****Compose**** ****setup** με:
+Θα δημιουργήσουμε ένα **Docker** **Compose** **setup** με:
 
-**Nginx**** ως ****reverse**** ****proxy**
-
-**Δύο ****web**** ****servers** με απλές HTML σελίδες
+- **Nginx**** ως **reverse** **proxy**
+- **Δύο web servers** με απλές HTML σελίδες
 
 Δημιουργία φακέλου εργασίας
 
-**mkdir** **~/**docker-nginx-multi
-
-**cd** **~/**docker-nginx-multi
+```bash
+mkdir ~/docker-nginx-multi
+cd ~/docker-nginx-multi
+```
 
 Δημιουργία docker-compose.yml
 
 Εκτελέστε:
 
+```bash
 nano docker-compose.yml
-
+```
 Επικολλήστε το παρακάτω περιεχόμενο:
 
-**version**: "3.8"
+```yaml
+version: "3.8"
 
-
-
-**services**:
-
-**  web1**:
-
-**    image**: nginx
-
-**    ****container_name**: web1
-
-**    volumes**:
-
+services:
+  web1:
+    image: nginx
+    container_name: web1
+    volumes:
       - ./web1:/usr/share/nginx/html
-
-**    networks**:
-
+    networks:
       - mynetwork
 
-
-
-**  web2**:
-
-**    image**: nginx
-
-**    ****container_name**: web2
-
-**    volumes**:
-
+  web2:
+    image: nginx
+    container_name: web2
+    volumes:
       - ./web2:/usr/share/nginx/html
-
-**    networks**:
-
+    networks:
       - mynetwork
 
-
-
-**  nginx**:
-
-**    image**: nginx
-
-**    ****container_name**: nginx-proxy
-
-**    volumes**:
-
+  nginx:
+    image: nginx
+    container_name: nginx-proxy
+    volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-
-**    ports**:
-
+    ports:
       - "8080:80"
-
-**    ****depends_on**:
-
+    depends_on:
       - web1
-
       - web2
-
-**    networks**:
-
+    networks:
       - mynetwork
 
+networks:
+  mynetwork:
+```
 
+Δημιουργία φακέλων για HTML αρχεία
 
-**networks**:
+```bash
+mkdir web1 web2
+```
 
-**  ****mynetwork**:
-
-**Δημιουργία**** ****φακέλων**** ****για**** ****HTML**** ****αρχεία**
-
-**mkdir** web1 web2
-
-
-
-**Δημιουργί****α HTML ****σελίδων**
+**Δημιουργία HTML σελίδων
 
 Για τον **Web1 server**:
 
-**echo** "<h1>Welcome to Web1</h1>" **>** web1**/**index.html
-
-
+```bash
+echo "<h1>Welcome to Web1</h1>" > web1/index.html
+```
 
 Για τον **Web2 server**:
 
-**echo** "<h1>Welcome to Web2</h1>" **>** web2**/**index.html
+```bash
+echo "<h1>Welcome to Web2</h1>" > web2/index.html
+```
 
-**Δημιουργία αρχείου **nginx.conf** (****Reverse**** ****Proxy****)**
+Δημιουργία αρχείου `nginx.conf` (ReverseProxy)
 
 Εκτελέστε:
 
+```bash
 nano nginx.conf
-
+```
 Επικολλήστε το παρακάτω:
 
-events **{}**
+```
+events {}
 
+http {
+    upstream backend {
+        server web1;
+        server web2;
+    }
 
+    server {
+        listen 80;
 
-http **{**
-
-    upstream backend **{**
-
-        server web1**;**
-
-        server web2**;**
-
-    **}**
-
-
-
-    server **{**
-
-        listen 80**;**
-
-
-
-        location **/** **{**
-
-            proxy_pass http**://**backend**;**
-
-        **}**
-
-    **}**
-
-**}**
+        location / {
+            proxy_pass http://backend;
+        }
+    }
+}
+```
 
 **Εκκίνηση των κοντέινερ**
 
@@ -368,25 +301,24 @@ http **{**
 docker compose up -d
 ```
 
-**Δοκιμή**** ****στο**** π****ρόγρ****αμμα π****εριήγησης**
+**Δοκιμή στο πρόγραμμα περιήγησης**
 
 Ανοίξτε:
 
 http://localhost:8080
 
-Το Nginx θα εναλλάσσει αιτήματα μεταξύ **Web****1** και **Web****2**.
+Το Nginx θα εναλλάσσει αιτήματα μεταξύ **Web1** και **Web2**.
 
-**Docker Volumes: ****Δι****αφορά Ephemeral και Persistent Volumes**
+## Docker Volumes: Διαφορά Ephemeral και Persistent Volumes
 
 Στο Docker, υπάρχουν **δύο τύποι αποθήκευσης δεδομένων**:
 
-**Ephemeral**** (Προσωρινή) Αποθήκευση** – Τα δεδομένα χάνονται όταν το κοντέινερ διαγραφεί.
-
-**Persistent**** (Μόνιμη) Αποθήκευση** – Τα δεδομένα διατηρούνται ανεξάρτητα από το κοντέινερ.
+- **Ephemeral (Προσωρινή) Αποθήκευση** – Τα δεδομένα χάνονται όταν το κοντέινερ διαγραφεί.
+- **Persistent (Μόνιμη) Αποθήκευση** – Τα δεδομένα διατηρούνται ανεξάρτητα από το κοντέινερ.
 
 Ας δούμε τη διαφορά με πρακτικά παραδείγματα.
 
-**Ephemeral**** ****Storage**** (Τα δεδομένα χάνονται)**
+**Ephemeral Storage** (Τα δεδομένα χάνονται)
 
 Τα δεδομένα αποθηκεύονται μέσα στο σύστημα αρχείων του κοντέινερ και **δεν επιβιώνουν** όταν το κοντέινερ διαγραφεί.
 
@@ -398,13 +330,15 @@ docker run -it --name temp-container ubuntu bash
 
 Μέσα στο κοντέινερ, δημιουργούμε ένα αρχείο:
 
-**echo** "Προσωρινά δεδομένα" **>** **/**tmp**/**tempfile.txt
-
-**cat** **/**tmp**/**tempfile.txt
-
+```bash
+echo "Προσωρινά δεδομένα" > /tmp/tempfile.txt
+cat /tmp/tempfile.txt
+```
 Θα δείτε:
 
+```
 Προσωρινά δεδομένα
+```
 
 **Βήμα 2: Διαγραφή Κοντέινερ και Έλεγχος Δεδομένων**
 
@@ -418,17 +352,16 @@ docker rm temp-container
 
 ```bash
 docker run -it ubuntu bash
+ls /tmp
 ```
-
-**ls** **/**tmp
 
 Το αρχείο **δεν υπάρχει** γιατί το σύστημα αρχείων του κοντέινερ ήταν προσωρινό (ephemeral).
 
-**Persistent**** ****Storage**** (Τα δεδομένα διατηρούνται)**
+**Persistent Storage** (Τα δεδομένα διατηρούνται)
 
 Τα δεδομένα αποθηκεύονται **εκτός του κοντέινερ**, σε ένα Docker **Volume**, και διατηρούνται ακόμα και μετά τη διαγραφή του κοντέινερ.
 
-**Βήμα 1: Δημιουργία ****Volume**
+**Βήμα 1: Δημιουργία Volume**
 
 ```bash
 docker volume create mydata
@@ -440,7 +373,7 @@ docker volume create mydata
 docker volume ls
 ```
 
-**Βήμα 2: Εκκίνηση Κοντέινερ με ****Volume**
+**Βήμα 2: Εκκίνηση Κοντέινερ με Volume**
 
 ```bash
 docker run -it --name persistent-container -v mydata:/data ubuntu bash
@@ -448,17 +381,22 @@ docker run -it --name persistent-container -v mydata:/data ubuntu bash
 
 Μέσα στο κοντέινερ, δημιουργούμε ένα αρχείο:
 
-**echo** "Μόνιμα δεδομένα" **>** **/**data**/**persistentfile.txt
-
-**cat** **/**data**/**persistentfile.txt
+```bash
+echo "Μόνιμα δεδομένα" > /data/persistentfile.txt
+cat /data/persistentfile.txt
+```
 
 Θα δείτε:
 
+```
 Μόνιμα δεδομένα
+```
 
 Βγαίνουμε από το κοντέινερ:
 
+```bash
 exit
+```
 
 **Βήμα 3: Διαγραφή Κοντέινερ και Έλεγχος Δεδομένων**
 
@@ -471,15 +409,13 @@ docker rm persistent-container
 Τώρα ξεκινάμε ένα νέο κοντέινερ και ελέγχουμε αν τα δεδομένα υπάρχουν:
 
 ```bash
-docker run -it --rm -v mydata**:/**data ubuntu bash
+docker run -it --rm -v mydata:/data ubuntu bash
+ls /data
+cat /data/persistentfile.txt
 ```
 
-**ls** **/**data
-
-**cat** **/**data**/**persistentfile.txt
-
 Θα δείτε ότι το αρχείο **υπάρχει ακόμα**:
-
+```
 persistentfile.txt
-
 Μόνιμα δεδομένα
+```
