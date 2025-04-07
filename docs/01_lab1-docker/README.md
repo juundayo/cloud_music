@@ -91,7 +91,7 @@ nano script.sh
 
 Προσθέστε το παρακάτω περιεχόμενο:
 
-```nano
+```bash
 #!/bin/bash
 while true; do
     echo "Το Docker κοντέινερ τρέχει! $(date)"
