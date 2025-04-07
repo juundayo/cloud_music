@@ -473,7 +473,7 @@ kubectl delete rs my-replicaset
 
 ## 06. Deployments στο Kubernetes
 
-**Εισαγωγή στα **Deployments**: Τα Deployments στο Kubernetes αποτελούν έναν ανώτερο μηχανισμό διαχείρισης Pods σε σύγκριση με τα ReplicaSets. Παρέχουν δυνατότητες όπως ελεγχόμενες ενημερώσεις, rollback σε προηγούμενες εκδόσεις και αυτοματοποίηση της διαδικασίας ανάπτυξης εφαρμογών.
+Εισαγωγή στα **Deployments**: Τα Deployments στο Kubernetes αποτελούν έναν ανώτερο μηχανισμό διαχείρισης Pods σε σύγκριση με τα ReplicaSets. Παρέχουν δυνατότητες όπως ελεγχόμενες ενημερώσεις, rollback σε προηγούμενες εκδόσεις και αυτοματοποίηση της διαδικασίας ανάπτυξης εφαρμογών.
 
 Διαφορές μεταξύ **Deployments** και **ReplicaSets**
 
@@ -533,7 +533,7 @@ kubectl get pods -o wide
 
 Τα Deployments μπορούν να χρησιμοποιηθούν για διάφορους σκοπούς πέρα από την απλή εκκίνηση εφαρμογών:
 
-**Rolling**** ****Updates****:** Επιτρέπουν σταδιακή αναβάθμιση της εφαρμογής χωρίς διακοπή της υπηρεσίας. Δημιουργήστε το παρακάτω αρχείο myrolling_deployment.yaml με τα παρακάτω
+**Rolling Updates:** Επιτρέπουν σταδιακή αναβάθμιση της εφαρμογής χωρίς διακοπή της υπηρεσίας. Δημιουργήστε το παρακάτω αρχείο myrolling_deployment.yaml με τα παρακάτω
 
 Για να κάνετε μια σταδιακή μετάβαση από την παλιά έκδοση του Nginx σε μια νέα έκδοση, απλά πρέπει να τροποποιήσετε την παράμετρο `image` στο `Deployment`. Ακολουθεί ένα παράδειγμα όπου η παλιά έκδοση του Nginx είναι η `nginx:1.14` και θα αναβαθμιστεί στη νέα έκδοση `nginx:latest` με σταδιακή ενημέρωση μέσω `rolling update`.
 
@@ -585,7 +585,7 @@ kubectl apply -f myrolling_deployment.yaml
 image: nginx:latest  # Νέα έκδοση του Nginx
 ```
 
-Ανανεώνουμε το ****Deployment**: Αφού κάνετε αυτή την αλλαγή, θα πρέπει να ενημερώσετε το Deployment χρησιμοποιώντας την εντολή `kubectl apply`.
+Ανανεώνουμε το **Deployment**: Αφού κάνετε αυτή την αλλαγή, θα πρέπει να ενημερώσετε το Deployment χρησιμοποιώντας την εντολή `kubectl apply`.
 
 ```bash
 kubectl apply -f myrolling_deployment.yaml
@@ -839,7 +839,7 @@ kubectl delete pvc my-volume-my-statefulset-2
 cd ~/cloud-uth/code/08_daemonsets
 ```
 
-**Δημιουργία *ενός DaemonSet**: Παράδειγμα αρχείου `fluentd-daemonset.yaml` για ένα DaemonSet με Fluentd:
+**Δημιουργία ενός DaemonSet**: Παράδειγμα αρχείου `fluentd-daemonset.yaml` για ένα DaemonSet με Fluentd:
 
 ```yaml
 apiVersion: apps/v1
@@ -1132,7 +1132,7 @@ kubectl delete -f .
 - Με **Persistent Volume** μέσω PVC
 - Παίρνει τις ρυθμίσεις σύνδεσης από **Secret** (`password`) και **ConfigMap** (`username`, `database name`)
 
-✅ **Web Server ****Pod** (ένα απλό PHP)
+✅ **Web Server Pod** (ένα απλό PHP)
 - Συνδέεται στη βάση
 - Παίρνει config από τα ίδια Secrets & ConfigMap
 - Εμφανίζει σε μια σελίδα δεδομένα από πίνακα της βάσης
@@ -1219,7 +1219,7 @@ cd ~/cloud-uth/code/11-web-pgsql-demo
 - Η βάση `myappdb` θα δημιουργηθεί
 - Ο χρήστης `postgres` θα έχει τον κωδικό `supersecret` (το Secret `db-secret`)
 
-💡 Όλα αυτά γίνονται κατά την **πρώτη εκκίνηση του **container**, όταν ο κατάλογος `/var/lib/postgresql/data` είναι **άδειος** (δηλαδή για νέο PVC).
+💡 Όλα αυτά γίνονται κατά την πρώτη εκκίνηση του **container**, όταν ο κατάλογος `/var/lib/postgresql/data` είναι **άδειος** (δηλαδή για νέο PVC).
 
 **🧩 Δημιουργία πίνακα και αρχικών δεδομένων**
 
@@ -1277,12 +1277,12 @@ kubectl apply -f 05-postgres-service.yaml
 
 🌐 Επιτρέπει στα υπόλοιπα pods να βρίσκουν τη βάση μέσω DNS: 
 
-postgres.**ikons**-priv.svc.cluster.local
+postgres.ikons-priv.svc.cluster.local
 
 **✅ Βήμα 7 – Web εφαρμογή (PHP μέσω ConfigMap)**
 
 ```bash
-kubectl apply -f 06-web-content-configmap.yaml -n ikons-priv
+kubectl apply -f 06-web-content-configmap.yaml
 ```
 
 📄 Δημιουργεί `index.php` μέσω ConfigMap, ο οποίος διαβάζει δεδομένα από τη βάση.
