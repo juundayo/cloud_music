@@ -1030,23 +1030,21 @@ cd ..
 
 Περιηγηθείτε στον κατάλογο του παραδείγματος
 
+```bash
 cd ~/cloud-uth/code/10_ConfigMaps
+```
 
-**Βήμα 1: Δημιουργία του ****ConfigMap**
+**Βήμα 1: Δημιουργία του ConfigMap**
 
-**apiVersion**: v1
-
-**kind**: ConfigMap
-
-**metadata**:
-
-**  name**: db-config
-
-**data**:
-
-**  username**: postgres
-
-**  ****host**: db-service
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-config
+data:
+  username: postgres
+  host: db-service
+```
 
 Για να δημιουργήσεις το ConfigMap:
 
@@ -1060,47 +1058,33 @@ kubectl apply -f db-configmap.yaml
 kubectl get configmaps
 ```
 
-**Βήμα 2: Χρήση του ****ConfigMap**** μέσω ****Volume**
+**Βήμα 2: Χρήση του ConfigMap μέσω Volume**
 
 Ακολουθεί παράδειγμα Pod όπου το ConfigMap γίνεται mount ως volume, επιτρέποντας στην εφαρμογή να διαβάσει το username και το host της βάσης από αρχεία:
 
-**apiVersion**: v1
-
-**kind**: Pod
-
-**metadata**:
-
-**  name**: app-with-configmap
-
-**spec**:
-
-**  containers**:
-
-**  - name**: my-app
-
-**    image**: nginx
-
-**    ****volumeMounts**:
-
-**    - name**: config-volume
-
-**      ****mountPath**: "/etc/db-config"
-
-**      ****readOnly**:** true**
-
-**  volumes**:
-
-**  - name**: config-volume
-
-**    ****configMap**:
-
-**      ****name**: db-config
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app-with-configmap
+spec:
+  containers:
+  - name: my-app
+    image: nginx
+    volumeMounts:
+    - name: config-volume
+      mountPath: "/etc/db-config"
+      readOnly: true
+  volumes:
+  - name: config-volume
+    configMap:
+      name: db-config
+```
 
 Με αυτή τη ρύθμιση, η εφαρμογή μπορεί να διαβάσει:
 
-/etc/db-config/username για το username (π.χ. postgres)
-
-/etc/db-config/host για το host της βάσης
+- `/etc/db-config/username` για το username (π.χ. `postgres`)
+- `/etc/db-config/host` για το host της βάσης
 
 Για να δημιουργήσεις το Pod:
 
@@ -1108,21 +1092,27 @@ kubectl get configmaps
 kubectl apply -f pod-with-configmap.yaml
 ```
 
-Μέσω k9s πάρε κονσόλα (πάτα s στο pod που δημιουργήθηκε) και τρέξε:
+Μέσω k9s πάρε κονσόλα (πάτα `s` στο pod που δημιουργήθηκε) και τρέξε:
 
-root@app-with-configmap:/# cat /etc/db-config/username; echo
-
+```bash
+cat /etc/db-config/username; echo
+```
+θα δεις
+```
 postgres
-
-root@app-with-configmap:/# cat /etc/db-config/host; echo
-
+```
+τρέξε
+```bash
+cat /etc/db-config/host; echo
+```
+θα δεις
+```
 db-service
+```
 
-root@app-with-configmap:/#
+όπου μπορείς να δεις τα στοιχεία που περάσανε από το k8s στο pod και είναι διαθέσιμα. Πάτα `Ctrl+d` για να αποσυνδεθείς από το pod και μετά `Ctrl+c` για να αποσυνδεθείς από το k9s.
 
-όπου μπορείς να δεις τα στοιχεία που περάσανε από το k8s στο pod και είναι διαθέσιμα. Πάτα Ctrl+d για να αποσυνδεθείς από το pod και μετά Ctrl+c για να αποσυνδεθείς από το k9s.
-
-**🧹**** Καθαρισμός της υποδομής (****Cleanup****)**
+**🧹 Καθαρισμός της υποδομής (Cleanup)**
 
 Για να καθαρίσετε το pod και τα secrets και να προχωρήσετε στο παρακάτω παράδειγμα, τρέξτε
 
@@ -1130,69 +1120,69 @@ root@app-with-configmap:/#
 kubectl delete -f .
 ```
 
-**Προσοχή:** φροντίστε να βρίσκεστε στον κατάλογο 10_ConfigMaps όταν εκτελέσετε την εντολή delete
+**Προσοχή:** φροντίστε να βρίσκεστε στον κατάλογο `10_ConfigMaps` όταν εκτελέσετε την εντολή delete
 
-ConfigMap και Secrets για εγκατάσταση Web Server με Postgres.
+## 11. ConfigMap και Secrets για εγκατάσταση Web Server με Postgres.
 
 **Σύντομη Περιγραφή:**
 
 Ακολουθεί ένα ένα πλήρες παράδειγμα Kubernetes με τα εξής:
 
-✅ **PostgreSQL**** ****Pod**
-
-Με **Persistent**** ****Volume** μέσω PVC
-
-Παίρνει τις ρυθμίσεις σύνδεσης από **Secret** (password) και **ConfigMap** (username, database name)
+✅ **PostgreSQL Pod**
+- Με **Persistent Volume** μέσω PVC
+- Παίρνει τις ρυθμίσεις σύνδεσης από **Secret** (`password`) και **ConfigMap** (`username`, `database name`)
 
 ✅ **Web Server ****Pod** (ένα απλό PHP)
+- Συνδέεται στη βάση
+- Παίρνει config από τα ίδια Secrets & ConfigMap
+- Εμφανίζει σε μια σελίδα δεδομένα από πίνακα της βάσης
 
-Συνδέεται στη βάση
+**Ο PostgreSQL container** θα τρέχει ένα **init SQL script** που δημιουργεί τη βάση και τον πίνακα με δείγμα δεδομένων.
 
-Παίρνει config από τα ίδια Secrets & ConfigMap
-
-Εμφανίζει σε μια σελίδα δεδομένα από πίνακα της βάσης
-
-**Ο ****PostgreSQL**** ****container** θα τρέχει ένα **init**** SQL ****script** που δημιουργεί τη βάση και τον πίνακα με δείγμα δεδομένων.
-
-**Ο Web Server ****container** θα είναι έτοιμος, βασισμένος σε **php:apache**, με ένα index.php που διαβάζει από τη βάση.
+**Ο Web Server container** θα είναι έτοιμος, βασισμένος σε **php:apache**, με ένα `index.php` που διαβάζει από τη βάση.
 
 Περιηγηθείτε στον κατάλογο του παραδείγματος
 
+```bash
 cd ~/cloud-uth/code/11-web-pgsql-demo
+```
 
-**ℹ️**** Σημαντικές Διευκρινίσεις - ****Συνοπτικά**
+**ℹ️ Σημαντικές Διευκρινίσεις - Συνοπτικά**
 
-**🔐**** Αρχικοποίηση χρήστη και βάσης στην ****PostgreSQL**
+**🔐 Αρχικοποίηση χρήστη και βάσης στην PostgreSQL**
 
 Ορίζεται μέσω:
 
-POSTGRES_USER (από ConfigMap)
-
-POSTGRES_DB (από ConfigMap)
-
-POSTGRES_PASSWORD (από Secret)
+- POSTGRES_USER (από ConfigMap)
+- POSTGRES_DB (από ConfigMap)
+- POSTGRES_PASSWORD (από Secret)
 
 Οι μεταβλητές αυτές ισχύουν **μόνο κατά την πρώτη εκκίνηση**, όταν το volume είναι **άδειο**. Αν υπάρχει ήδη περιεχόμενο στο PVC, δεν αλλάζουν τον υπάρχοντα χρήστη ή τον κωδικό.
 
-**🗃️**** Δημιουργία Πίνακα και Δεδομένων**
+**🗃️ Δημιουργία Πίνακα και Δεδομένων**
 
-Το αρχείο init.sql εκτελείται αυτόματα στην πρώτη εκκίνηση μέσω του path /docker-entrypoint-initdb.d/init.sql. Δημιουργεί τον πίνακα my_table και εισάγει δείγμα δεδομένων.
+Το αρχείο `init.sql` εκτελείται αυτόματα στην πρώτη εκκίνηση μέσω του path `/docker-entrypoint-initdb.d/init.sql`. Δημιουργεί τον πίνακα `my_table` και εισάγει δείγμα δεδομένων.
 
-**ℹ️**** Σημαντικές Διευκρινίσεις**** - Αναλυτικά**
+**ℹ️ Σημαντικές Διευκρινίσεις - Αναλυτικά**
 
-**🔐**** Πώς ****αρχικοποιείται**** ο χρήστης στη βάση ****PostgreSQL**
+**🔐 Πώς αρχικοποιείται ο χρήστης στη βάση PostgreSQL**
 
 Στο παράδειγμα που σου έδωσα, ο **κωδικός του χρήστη** στην PostgreSQL αρχικοποιείται **μέσω των μεταβλητών περιβάλλοντος** που διαβάζονται από το Secret και το ConfigMap κατά την εκκίνηση του PostgreSQL container.
 
-**📌**** Συγκεκριμένα:**
+**📌 Συγκεκριμένα:**
 
 Ο container postgres:15 (όπως και όλες οι επίσημες PostgreSQL εικόνες) υποστηρίζει τα εξής env vars:
 
+|**Μεταβλητή** | **Περιγραφή** |
+|`POSTGRES_USER` |	Όνομα του χρήστη (π.χ. `postgres`) |
+|`POSTGRES_DB`	| Όνομα της βάσης (π.χ. myappdb) |
+|`POSTGRES_PASSWORD` |	Κωδικός του χρήστη |
+
+
 Αυτές οι τιμές προέρχονται από:
 
-02-configmap.yaml → username, dbname
-
-01-secret.yaml → password
+`02-configmap.yaml` → `username`, `dbname`
+`01-secret.yaml` → `password`
 
 Αν το PersistentVolumeClaim είναι **καινούργιο** (άδειος δίσκος), ο PostgreSQL container:
 
