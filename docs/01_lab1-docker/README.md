@@ -118,22 +118,22 @@ nano Dockerfile
 
 ```dockerfile
 # Χρησιμοποιούμε την εικόνα Ubuntu
-FROM ubuntu**:**latest
+FROM ubuntu:latest
 
 # Ορίζουμε τον maintainer
-LABEL maintainer**=**"example@example.com"
+LABEL maintainer="example@example.com"
 
 # Ενημέρωση του συστήματος και εγκατάσταση του bash
-RUN apt-get update **&&** **apt-get** install -y bash
+RUN apt-get update && apt-get install -y bash
 
 # Αντιγραφή του script μέσα στο κοντέινερ
-COPY script.sh **/**script.sh
+COPY script.sh /script.sh
 
 # Ορισμός δικαιωμάτων εκτέλεσης στο script
-RUN chmod **+**x **/**script.sh
+RUN chmod +x /script.sh
 
 # Εκτέλεση του script κατά την εκκίνηση του κοντέινερ
-CMD **[**"/script.sh"**]**
+CMD ["/script.sh"]
 ```
 
 Αποθηκεύστε το αρχείο με (`CTRL` + `X`, μετά `Y` και `Enter`).
