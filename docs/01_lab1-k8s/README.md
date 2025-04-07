@@ -214,27 +214,25 @@ local-path (default)   rancher.io/local-path   Delete          WaitForFirstConsu
 cd ~/cloud-uth/code/04_pvc_pv
 ```
 
-Αρχικά, χρειάζεται το YAML αρχείο για το PVC που θα χρησιμοποιεί το υπάρχον **local****-****path** StorageClass. Το αρχείο nginx-pvc.yaml έχει τα εξής:
+Αρχικά, χρειάζεται το YAML αρχείο για το PVC που θα χρησιμοποιεί το υπάρχον **local-path** StorageClass. Το αρχείο nginx-pvc.yaml έχει τα εξής:
 
-**apiVersion**: v1
-
-**kind**: PersistentVolumeClaim
-
-**metadata**:
-
-**  name**: nginx-pvc
-
-**spec**:
-
-**  ****accessModes**:
-
-    - ReadWriteOnce
-
-**  ****resources**:
-
-**    ****requests**:
-
-**      ****storage**: 1Gi
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+spec:
+  containers:
+    - name: nginx
+      image: nginx:latest
+      volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: nginx-storage
+  volumes:
+    - name: nginx-storage
+      persistentVolumeClaim:
+        claimName: nginx-pvc
+```
 
 Για να δημιουργήσετε το PVC στον cluster σας, εκτελέστε την παρακάτω εντολή:
 
