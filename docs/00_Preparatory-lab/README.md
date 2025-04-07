@@ -1,4 +1,4 @@
-# Προπαρασκευαστικές οδηγίες για την εκτέλεση ****περιεκτών (****containers****)**** ****Docker**** ****τοπικά στον υπολογιστή σας
+# Προπαρασκευαστικές οδηγίες για την εκτέλεση περιεκτών (containers) Docker τοπικά στον υπολογιστή σας
 
 
 
@@ -6,7 +6,7 @@
 
 
 
-**Ενεργοποίηση**** WSL ****και**** Virtual Machine Platform**
+## Ενεργοποίηση WSL και Virtual Machine Platform
 
 Αρχικά, πρέπει να ενεργοποιήσετε το WSL και τη δυνατότητα Virtual Machine Platform στο Windows
 
@@ -47,7 +47,7 @@ Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
 sudo apt update && sudo apt upgrade -y
 ```
 
-**1. Ελέγξτε την κατάσταση του WSL**
+**Ελέγξτε την κατάσταση του WSL**
 
 Ανοίξτε PowerShell (ως διαχειριστής) και εκτελέστε την εξής εντολή:
 
@@ -80,7 +80,7 @@ wsl --list --verbose
 
 Αν όλα είναι σωστά ρυθμισμένα, το WSL και το Virtual Machine Platform θα πρέπει να εμφανίζονται ως ενεργοποιημένα και το Ubuntu ή άλλη διανομή θα είναι διαθέσιμη για χρήση στο σύστημά σας.
 
-**Εγκατάσταση**** ****Docker**** ****Desktop****: **Μεταβείτε στην επίσημη σελίδα του Docker και κατέβασε την πιο πρόσφατη έκδοση του Docker Desktop για Windows x86_64: 
+## Εγκατάσταση Docker Desktop: Μεταβείτε στην επίσημη σελίδα του Docker και κατέβασε την πιο πρόσφατη έκδοση του Docker Desktop για Windows x86_64: 
 
 https://docs.docker.com/desktop/setup/install/windows-install/
 
@@ -104,7 +104,7 @@ https://docs.docker.com/desktop/setup/install/windows-install/
 
 ![Εικόνα 3](images/img3.png)
 
-**Ρύθμιση Docker για χρήση με WSL 2**** :** Μετά την εγκατάσταση, μπορείς να ανοίξεις το **Docker Desktop** μέσω του **Μενού Έναρξη**.
+**Ρύθμιση Docker για χρήση με WSL 2** : Μετά την εγκατάσταση, μπορείς να ανοίξεις το **Docker Desktop** μέσω του **Μενού Έναρξη**.
 
 Αν είναι η πρώτη φορά που ανοίγεις το Docker Desktop, θα σε καθοδηγήσει να ενεργοποιήσεις το WSL 2.
 
