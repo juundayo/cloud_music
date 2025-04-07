@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: nginx:1.14  # Παλιά έκδοση του Nginx
+        ports:
+        - containerPort: 80
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1              # Μέγιστος αριθμός επιπλέον pods που μπορούν να δημιουργηθούν κατά τη διάρκεια του update
+      maxUnavailable: 1        # Μέγιστος αριθμός pods που μπορούν να είναι μη διαθέσιμα κατά την ενημέρωση
