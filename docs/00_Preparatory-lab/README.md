@@ -80,7 +80,9 @@ wsl --list --verbose
 
 Αν όλα είναι σωστά ρυθμισμένα, το WSL και το Virtual Machine Platform θα πρέπει να εμφανίζονται ως ενεργοποιημένα και το Ubuntu ή άλλη διανομή θα είναι διαθέσιμη για χρήση στο σύστημά σας.
 
-## Εγκατάσταση Docker Desktop: Μεταβείτε στην επίσημη σελίδα του Docker και κατέβασε την πιο πρόσφατη έκδοση του Docker Desktop για Windows x86_64: 
+## Εγκατάσταση Docker Desktop
+
+Μεταβείτε στην επίσημη σελίδα του Docker και κατέβασε την πιο πρόσφατη έκδοση του Docker Desktop για Windows x86_64: 
 
 https://docs.docker.com/desktop/setup/install/windows-install/
 
