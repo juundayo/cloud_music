@@ -1186,75 +1186,51 @@ cd ~/cloud-uth/code/11-web-pgsql-demo
 
 Αν το PersistentVolumeClaim είναι **καινούργιο** (άδειος δίσκος), ο PostgreSQL container:
 
-Δημιουργεί τον χρήστη και τη βάση
-
-Θέτει τον κωδικό με βάση το POSTGRES_PASSWORD
+- Δημιουργεί τον χρήστη και τη βάση
+- Θέτει τον κωδικό με βάση το `POSTGRES_PASSWORD`
 
 ⚠️ Αν το PVC έχει ήδη δεδομένα (π.χ. από προηγούμενη εκκίνηση), οι μεταβλητές **δεν επηρεάζουν** τα υπάρχοντα credentials. Σε αυτή την περίπτωση, πρέπει να αλλάξεις τον κωδικό από μέσα με SQL (ALTER USER) ή να διαγράψεις το PVC (και τα δεδομένα του).
 
-**🔁**** Πώς γίνεται στην πράξη:**
+**🔁 Πώς γίνεται στην πράξη:**
 
-
-
-**    ****env:**
-
-**    - name: POSTGRES_USER**
-
-**      ****valueFrom****:**
-
-**        ****configMapKeyRef****:**
-
-**          name: ****db****-config**
-
-**          key: username**
-
-**    - name: POSTGRES_DB**
-
-**      ****valueFrom****:**
-
-**        ****configMapKeyRef****:**
-
-**          name: ****db****-config**
-
-**          key: ****dbname**
-
-**    - name: POSTGRES_PASSWORD**
-
-**      ****valueFrom****:**
-
-**        ****secretKeyRef****:**
-
-**          name: ****db****-secret**
-
-**          key: password**
-
-
+```yaml
+    env:
+    - name: POSTGRES_USER
+      valueFrom:
+        configMapKeyRef:
+          name: db-config
+          key: username
+    - name: POSTGRES_DB
+      valueFrom:
+        configMapKeyRef:
+          name: db-config
+          key: dbname
+    - name: POSTGRES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: db-secret
+          key: password
+```
 
 Αυτό σημαίνει:
 
-Ο χρήστης postgres θα δημιουργηθεί (αν δεν υπάρχει ήδη)
+- Ο χρήστης `postgres` θα δημιουργηθεί (αν δεν υπάρχει ήδη)
+- Η βάση `myappdb` θα δημιουργηθεί
+- Ο χρήστης `postgres` θα έχει τον κωδικό `supersecret` (το Secret `db-secret`)
 
-Η βάση myappdb θα δημιουργηθεί
+💡 Όλα αυτά γίνονται κατά την **πρώτη εκκίνηση του **container**, όταν ο κατάλογος `/var/lib/postgresql/data` είναι **άδειος** (δηλαδή για νέο PVC).
 
-Ο χρήστης postgres θα έχει τον κωδικό supersecret (το Secret db-secret)
+**🧩 Δημιουργία πίνακα και αρχικών δεδομένων**
 
-💡 Όλα αυτά γίνονται κατά την **πρώτη εκκίνηση του ****container**, όταν ο κατάλογος /var/lib/postgresql/data είναι **άδειος** (δηλαδή για νέο PVC).
+Ο πίνακας `my_table` δημιουργείται αυτόματα με SQL script (`init.sql`) που φορτώνεται μέσω `ConfigMap` και προσαρτάται (mount) στον PostgreSQL container στον φάκελο `/docker-entrypoint-initdb.d`.
 
-**🧩**** Δημιουργία πίνακα και αρχικών δεδομένων**
-
-Ο πίνακας my_table δημιουργείται αυτόματα με SQL script (init.sql) που φορτώνεται μέσω ConfigMap και προσαρτάται (mount) στον PostgreSQL container στον φάκελο /docker-entrypoint-initdb.d.
-
-Η εντολή CREATE TABLE είναι με IF NOT EXISTS, οπότε η διαδικασία είναι **idempotent** και ασφαλής για επανεκκινήσεις.
-
-
+Η εντολή `CREATE TABLE` είναι με `IF NOT EXISTS`, οπότε η διαδικασία είναι **idempotent** και ασφαλής για επανεκκινήσεις.
 
 Αν έχεις ήδη τρέξει τον container και ο τόμος δεδομένων (PVC) κρατάει προηγούμενα δεδομένα, τότε αυτές οι μεταβλητές **δεν έχουν πλέον αποτέλεσμα**, γιατί η βάση έχει ήδη αρχικοποιηθεί.
 
-
-
 **Αναλυτικά Βήματα**
 
-**🔧**** Βήμα 1: ****Secret**** για τον κωδικό της βάσης**
+**🔧 Βήμα 1: Secret για τον κωδικό της βάσης**
 
 ```bash
 kubectl apply -f 01-secret.yaml
@@ -1262,7 +1238,7 @@ kubectl apply -f 01-secret.yaml
 
 🔐 Δημιουργεί το Secret με το password της PostgreSQL (supersecret σε base64).
 
-**🧩**** Βήμα 2: ****ConfigMap**** με ρυθμίσεις βάσης**
+**🧩 Βήμα 2: ConfigMap με ρυθμίσεις βάσης**
 
 ```bash
 kubectl apply -f 02-configmap.yaml
@@ -1270,7 +1246,7 @@ kubectl apply -f 02-configmap.yaml
 
 📋 Περιλαμβάνει: username, dbname, host.
 
-**💾**** Βήμα 3: ****ConfigMap**** με ****SQL**** αρχικοποίησης**
+**💾 Βήμα 3: ConfigMap με SQL αρχικοποίησης**
 
 ```bash
 kubectl apply -f init-sql-configmap.yaml
@@ -1278,13 +1254,13 @@ kubectl apply -f init-sql-configmap.yaml
 
 📄 Περιέχει SQL εντολές για τη δημιουργία πίνακα my_table και εισαγωγή δεδομένων (Alice, Bob, Charlie).
 
-**✅**** ****Βήμα**** 4 – Persistent Volume Claim ****για**** ****βάση**
+**✅Βήμα 4 – Persistent Volume Claim για βάση**
 
 ```bash
 kubectl apply -f 03-pvc.yaml 
 ```
 
-**🐘**** ****Βήμα**** ****5****: PostgreSQL Pod**
+**🐘 Βήμα 5: PostgreSQL Pod**
 
 ```bash
 kubectl apply -f 04-postgres.yaml
@@ -1292,7 +1268,7 @@ kubectl apply -f 04-postgres.yaml
 
 💾 Δημιουργεί χώρο 1Gi για αποθήκευση δεδομένων της PostgreSQL.
 
-**✅**** ****Βήμα**** 6 – ****Service**** ****για**** ****τη**** ****βάση**
+**✅ Βήμα 6 – Service για τη βάση**
 
 ```bash
 kubectl apply -f 05-postgres-service.yaml
@@ -1300,25 +1276,25 @@ kubectl apply -f 05-postgres-service.yaml
 
 🌐 Επιτρέπει στα υπόλοιπα pods να βρίσκουν τη βάση μέσω DNS: 
 
-postgres.ikons-priv.svc.cluster.local
+postgres.**ikons**-priv.svc.cluster.local
 
-**✅**** ****Βήμα**** 7 – Web ****εφαρμογή**** (PHP ****μέσω**** ****ConfigMap****)**
+**✅ Βήμα 7 – Web εφαρμογή (PHP μέσω ConfigMap)**
 
 ```bash
 kubectl apply -f 06-web-content-configmap.yaml -n ikons-priv
 ```
 
-📄 Δημιουργεί index.php μέσω ConfigMap, ο οποίος διαβάζει δεδομένα από τη βάση.
+📄 Δημιουργεί `index.php` μέσω ConfigMap, ο οποίος διαβάζει δεδομένα από τη βάση.
 
-**🌐**** ****Βήμα**** ****8****: ****Web**** ****Server**** ****Pod**
+**🌐 Βήμα 8: Web Server Pod**
 
 ```bash
 kubectl apply -f 07-webserver.yaml
 ```
 
-Εκκινεί το Web server με το image webdevops/php-apache:8.1, το οποίο περιλαμβάνει pgsql extension.
+Εκκινεί το Web server με το image `webdevops/php-apache:8.1`, το οποίο περιλαμβάνει pgsql extension για σύνδεση με postgres.
 
-**✅**** Βήμα 9 – ****Service**** για πρόσβαση στον Web Server**
+**✅ Βήμα 9 – Service για πρόσβαση στον Web Server**
 
 ```bash
 kubectl apply -f 08-webserver-service.yaml
@@ -1326,374 +1302,244 @@ kubectl apply -f 08-webserver-service.yaml
 
 Πλέον, έχει σηκωθεί το pod και το service είναι διαθέσιμο, μπορείτε να ανοίξετε την παρακάτω σελίδα:
 
-
+http://webserver-service.ikons-priv.svc.cluster.local/
 
 Ή μπορείτε να τρέξετε από το command line την παρακάτω εντολή:
 
+```bash
 curl http://webserver-service.ikons-priv.svc.cluster.local
+```
 
 και θα δείτε ένα αποτέλεσμα σαν το παρακάτω:
 
+```
 ikons@mylaptop:~/cloud/k8s-web-pgsql-demo-final$ curl http://webserver-service.ikons-priv.svc.cluster.local
 
 <h1>Records from DB</h1><p>Alice</p><p>Bob</p><p>Charlie</p>
+```
 
-**📦**** Μαζική εγκατάσταση μέσω ****MakeFile****:**
+**📦 Μαζική εγκατάσταση μέσω MakeFile:**
 
-Για να τρέξετε όλα τα βήματα μαζί, μπορείτε να χρησιμοποιήσετε το Makefile που υπάρχει στον κατάλογο. Το makefile έχει δυο actions, την deploy και την clean.
+Για να τρέξετε όλα τα βήματα μαζί, μπορείτε να χρησιμοποιήσετε το Makefile που υπάρχει στον κατάλογο. Το makefile έχει δυο actions, την `deploy` και την `clean`.
 
+```bash
 make deploy
+```
 
-**🧼**** ****Μαζική ****Απεγκατάσταση**** (****Cleanup****)**
+**🧼 Μαζική Απεγκατάσταση (Cleanup)**
 
+```bash
 make clean
+```
 
-Nginx και πολλαπλοί web servers σε Kubernetes
+## 12. Nginx και πολλαπλοί web servers σε Kubernetes
 
 Περιηγηθείτε στον κατάλογο του παραδείγματος
 
+```bash
 cd ~/cloud-uth/code/12_nginx-proxy
+```
 
 Βήμα 1: Ορισμός Web Servers (Deployments & Services)
 
-**Αρχείο** web-deployments.yaml
+**Αρχείο** `web-deployments.yaml`
 
 Δημιουργούμε δύο web servers που θα σερβίρουν απλές HTML σελίδες.
 
-**apiVersion**: apps/v1
-
-**kind**: Deployment
-
-**metadata**:
-
-**  name**: web1
-
-**spec**:
-
-**  replicas**: 1
-
-**  selector**:
-
-**    ****matchLabels**:
-
-**      app**: web1
-
-**  template**:
-
-**    metadata**:
-
-**      labels**:
-
-**        app**: web1
-
-**    spec**:
-
-**      containers**:
-
-**        - name**: web1
-
-**          image**: nginx
-
-**          ****volumeMounts**:
-
-**            - name**: web-content
-
-**              ****mountPath**: /usr/share/nginx/html
-
-**      volumes**:
-
-**        - name**: web-content
-
-**          ****configMap**:
-
-**            name**: web1-html
-
-
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web1
+  template:
+    metadata:
+      labels:
+        app: web1
+    spec:
+      containers:
+        - name: web1
+          image: nginx
+          volumeMounts:
+            - name: web-content
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: web-content
+          configMap:
+            name: web1-html
 
 ---
-
-**apiVersion**: apps/v1
-
-**kind**: Deployment
-
-**metadata**:
-
-**  name**: web2
-
-**spec**:
-
-**  replicas**: 1
-
-**  selector**:
-
-**    ****matchLabels**:
-
-**      app**: web2
-
-**  template**:
-
-**    metadata**:
-
-**      labels**:
-
-**        app**: web2
-
-**    spec**:
-
-**      containers**:
-
-**        - name**: web2
-
-**          image**: nginx
-
-**          ****volumeMounts**:
-
-**            - name**: web-content
-
-**              ****mountPath**: /usr/share/nginx/html
-
-**      volumes**:
-
-**        - name**: web-content
-
-**          ****configMap**:
-
-**            ****name**: web2-html
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web2
+  template:
+    metadata:
+      labels:
+        app: web2
+    spec:
+      containers:
+        - name: web2
+          image: nginx
+          volumeMounts:
+            - name: web-content
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: web-content
+          configMap:
+            name: web2-html
+```
 
 
+**Αρχείο** `web-services.yaml`
 
-**Αρχείο**** **web-services.yaml
 
 Ορίζουμε τα Services για να προσφέρουμε πρόσβαση στους web servers.
 
-**apiVersion**: v1
-
-**kind**: Service
-
-**metadata**:
-
-**  name**: web1
-
-**spec**:
-
-**  selector**:
-
-**    app**: web1
-
-**  ports**:
-
-**    - protocol**: TCP
-
-**      port**: 80
-
-**      ****targetPort**: 80
-
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: web1
+spec:
+  selector:
+    app: web1
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
 ---
-
-**apiVersion**: v1
-
-**kind**: Service
-
-**metadata**:
-
-**  name**: web2
-
-**spec**:
-
-**  selector**:
-
-**    app**: web2
-
-**  ports**:
-
-**    - protocol**: TCP
-
-**      port**: 80
-
-**      ****targetPort**: 80
+apiVersion: v1
+kind: Service
+metadata:
+  name: web2
+spec:
+  selector:
+    app: web2
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+```
 
 
 
 Βήμα 2: Προσθήκη Περιεχομένου στις Σελίδες (ConfigMaps)
 
 
-
-**Αρχείο **web-configmaps.yaml
+**Αρχείο** `web-configmaps.yaml`
 
 Χρησιμοποιούμε ConfigMaps για το περιεχόμενο των HTML σελίδων.
 
-**apiVersion**: v1
-
-**kind**: ConfigMap
-
-**metadata**:
-
-**  name**: web1-html
-
-**data**:
-
-**  index.html**: |
-
-**    <h1>****Welcome to**** Web1</h1>**
-
-
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: web1-html
+data:
+  index.html: |
+    <h1>Welcome to Web1</h1>
 
 ---
-
-**apiVersion**: v1
-
-**kind**: ConfigMap
-
-**metadata**:
-
-**  name**: web2-html
-
-**data**:
-
-**  index.html**: |
-
-**    <h1>****Welcome to**** Web2</h1>**
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: web2-html
+data:
+  index.html: |
+    <h1>Welcome to Web2</h1>
+```
 
 
 
 Βήμα 3: Ορισμός του Nginx Reverse Proxy
 
 
-
-**Αρχείο**** **nginx-configmap.yaml
+**Αρχείο** `nginx-configmap.yaml`
 
 Ορίζουμε το configuration του Nginx ως reverse proxy.
 
-**apiVersion**: v1
-
-**kind**: ConfigMap
-
-**metadata**:
-
-**  name**: nginx-config
-
-**data**:
-
-**  ****nginx.conf**: |
-
-**    events {}**
-
-
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  nginx.conf: |
+    events {}
 
     http {
-
         upstream backend {
-
             server web1;
-
             server web2;
-
         }
-
-
 
         server {
-
             listen 80;
 
-
-
             location / {
-
                 proxy_pass http://backend;
-
             }
-
         }
-
     }
+```
 
 
+Αρχείο `nginx-deployment.yaml`
 
-Αρχείο nginx-deployment.yaml
+Ορίζουμε το `Deployment` και `Service` για τον Nginx proxy.
 
-Ορίζουμε το Deployment και Service για τον Nginx proxy.
-
-**apiVersion**: apps/v1
-
-**kind**: Deployment
-
-**metadata**:
-
-**  name**: nginx-proxy
-
-**spec**:
-
-**  replicas**: 1
-
-**  selector**:
-
-**    ****matchLabels**:
-
-**      app**: nginx-proxy
-
-**  template**:
-
-**    metadata**:
-
-**      labels**:
-
-**        app**: nginx-proxy
-
-**    spec**:
-
-**      containers**:
-
-**        - name**: nginx
-
-**          image**: nginx
-
-**          ports**:
-
-**            - ****containerPort**: 80
-
-**          ****volumeMounts**:
-
-**            - name**: config-volume
-
-**              ****mountPath**: /etc/nginx/nginx.conf
-
-**              ****subPath**: nginx.conf
-
-**      volumes**:
-
-**        - name**: config-volume
-
-**          ****configMap**:
-
-**            name**: nginx-config
-
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-proxy
+  template:
+    metadata:
+      labels:
+        app: nginx-proxy
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+      volumes:
+        - name: config-volume
+          configMap:
+            name: nginx-config
 ---
-
-**apiVersion**: v1
-
-**kind**: Service
-
-**metadata**:
-
-**  name**: nginx-service
-
-**spec**:
-
-**  ****type**: LoadBalancer
-
-**  selector**:
-
-**    app**: nginx-proxy
-
-**  ports**:
-
-**    - protocol**: TCP
-
-**      port**: 80
-
-**      ****targetPort**: 80
-
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: nginx-proxy
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+```
 
 
 Βήμα 4: Ανάπτυξη στο Kubernetes
@@ -1725,46 +1571,27 @@ kubectl apply -f nginx-deployment.yaml
 Βήμα 5: Πρόσβαση στην Εφαρμογή
 
 
-
 Ανοίγουμε στο πρόγραμμα περιήγησης:
 
-http://nginx-service.**<****username>**-priv.svc.cluster.local/
+http://nginx-service.**<username>**-priv.svc.cluster.local/
 
 
 
-Ο Nginx θα διανέμει τα αιτήματα στους **Web****1** και **Web****2** εναλλάξ.
+Ο Nginx θα διανέμει τα αιτήματα στους **Web1** και **Web2** εναλλάξ.
 
-**🧹**** Καθαρισμός της υποδομής (****Cleanup****)**
+**🧹 Καθαρισμός της υποδομής (Cleanup)**
 
 Αφού ολοκληρώσετε τη δοκιμή με τους πολλαπλούς web servers και τον reverse proxy με Nginx, μπορείτε να καθαρίσετε την υποδομή εκτελώντας τις παρακάτω εντολές:
 
+```bash
 # Διαγραφή του Nginx Proxy (Deployment & Service)
-
-```bash
 kubectl delete -f nginx-deployment.yaml
-```
-
-```bash
 kubectl delete -f nginx-configmap.yaml
-```
-
-
 
 # Διαγραφή των Web Servers (Deployments & Services)
-
-```bash
 kubectl delete -f web-deployments.yaml
-```
-
-```bash
 kubectl delete -f web-services.yaml
-```
-
-
 
 # Διαγραφή των ConfigMaps για HTML περιεχόμενο
-
-```bash
 kubectl delete -f web-configmaps.yaml
 ```
-
