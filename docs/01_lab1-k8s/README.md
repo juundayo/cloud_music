@@ -826,7 +826,7 @@ kubectl delete pvc my-volume-my-statefulset-2
 
 **Εισαγωγή στα DaemonSets:** Τα DaemonSets στο Kubernetes χρησιμοποιούνται για την εκτέλεση Pods σε **κάθε κόμβο (node)** ενός cluster. Είναι χρήσιμα για εφαρμογές όπως συλλογή logs, monitoring agents και network services που πρέπει να εκτελούνται σε όλους τους κόμβους.
 
-**Διαφορές μεταξύ ****DaemonSets**** και ****Deployments**
+Διαφορές μεταξύ **DaemonSets** και **Deployments**
 
 - **Εκτέλεση σε κάθε Κόμβο:** Σε αντίθεση με τα Deployments, τα DaemonSets διασφαλίζουν ότι κάθε κόμβος έχει ένα αντίγραφο του Pod.
 - **Αυτόματη Προσθήκη σε Νέους Κόμβους:** Όταν ένας νέος κόμβος προστεθεί στο cluster, το DaemonSet θα εκτελέσει αυτόματα ένα Pod σε αυτόν.
