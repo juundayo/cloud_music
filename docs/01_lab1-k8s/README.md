@@ -3,7 +3,7 @@
 # Παραδείγματα χρήσης και οδηγός σύνδεσης στο Kubernetes του Εργαστηρίου VDCLOUD
 
 
-## Εισαγωγή
+## 1. Εισαγωγή
 
 Αυτός ο οδηγός παρέχει λεπτομερείς οδηγίες για τη σύνδεση στην υποδομή του εργαστηρίου VDCLOUD μέσω VPN, την εγκατάσταση των απαραίτητων εργαλείων, τη ρύθμιση του περιβάλλοντος εργασίας ενός τοπικού υπολογιστή και την εκτέλεση εργασιών Kubernetes (k8s). Το [Kubernetes (K8s)](https://kubernetes.io/) είναι μια ανοιχτού κώδικα πλατφόρμα για τη διαχείριση containerized εφαρμογών σε κλίμακα. Σκοπός του είναι να διευκολύνει τη διαχείριση, την αυτοματοποίηση και την κλιμάκωση εφαρμογών.
 
@@ -27,7 +27,7 @@ cd cloud-uth
 git pull
 ```
 
-## Εγκατάσταση OpenVPN Client, kubectl και k9s
+## 2. Εγκατάσταση OpenVPN Client, kubectl και k9s
 
 Για να συνδεθείτε στην υποδομή, εγκαταστήστε τον [OpenVPN client](https://openvpn.net/community-downloads/). 
 
@@ -127,7 +127,7 @@ l
 d
 ```
 
-## Συγγραφή Manifest και Εκτέλεση με kubectl
+## 3. Συγγραφή Manifest και Εκτέλεση με kubectl
 
 Τα **manifest** είναι αρχεία YAML που περιγράφουν τους πόρους του Kubernetes. Μπορείς να δημιουργήσεις και να εφαρμόσεις αυτά τα αρχεία χρησιμοποιώντας την εντολή `kubectl apply`.
 
@@ -185,7 +185,7 @@ http:// 10.233.101.168
 kubectl delete -f nginx-pod.yaml
 ```
 
-## Αποθηκευτικός χώρος περιεκτών με χρήση storage classes, persistent volume claims και persistent volumes
+## 4. Αποθηκευτικός χώρος περιεκτών με χρήση storage classes, persistent volume claims και persistent volumes
 
 **Μη Μόνιμη Αποθήκευση (Ephemeral Storage):** Τα Pods στο Kubernetes από προεπιλογή δεν έχουν μόνιμη αποθήκευση. Αν αποθηκεύσετε δεδομένα σε ένα Pod, αυτά τα δεδομένα θα χαθούν μόλις το Pod διαγραφεί ή επανεκκινηθεί. Αυτό συμβαίνει επειδή τα δεδομένα αποθηκεύονται στο filesystem του container, το οποίο είναι προσωρινό.
 
@@ -244,59 +244,45 @@ kubectl apply -f nginx-pvc.yaml
 
 Αυτή η εντολή δημιουργεί το PVC που ζητάει 1Gi αποθηκευτικού χώρου μέσω της προεπιλεγμένης Storage Class της συστοιχίας.
 
-**Δημιουργία του ****Nginx**** ****Pod**** που Χρησιμοποιεί ****PVC**** (Μόνιμος Αποθηκευτικός Χώρος)**
+**Δημιουργία του Nginx Pod που Χρησιμοποιεί PVC (Μόνιμος Αποθηκευτικός Χώρος)**
 
 Πρώτα, χρειάζεται να έχουμε διαθέσιμο ένα αρχείο κειμένου που θα τοποθετηθεί στον κατάλογο που σερβίρει ο Nginx. Αυτό το αρχείο θα είναι διαθέσιμο ακόμα και αν το Pod διαγραφεί ή επανεκκινηθεί.
 
-Το αρχείο index.html που θα τοποθετηθεί στον κατάλογο /usr/share/nginx/html για να το σερβίρει ο Nginx περιέχει τα εξής (δείτε τα περιεχόμενα με cat index.html ) :
+Το αρχείο `index.html` που θα τοποθετηθεί στον κατάλογο `/usr/share/nginx/html` για να το σερβίρει ο Nginx περιέχει τα εξής (δείτε τα περιεχόμενα με:
+
+```bash
+cat index.html
+```
 
 ```html
 <html>
+  <head><title>Persistent Storage Example</title></head>
+  <body>
+    <h1>Welcome to Nginx with Persistent Volume!</h1>
+    <p>This content is stored in a Persistent Volume and will persist even if the Pod is terminated.</p>
+  </body>
+</html>
 ```
 
-**  **<head><title>**Persistent Storage Example**</title></head>
+Αφού δημιουργήσουμε το PVC, μπορούμε να δημιουργήσουμε το Pod που θα χρησιμοποιεί το Persistent Volume μέσω του PVC και θα σερβίρει το αρχείο `index.html`. Αυτό γίνεται με το αρχείο `nginx-pod.yaml` με το παρακάτω περιεχόμενο:
 
-**  **<body>
-
-**    **<h1>**Welcome to Nginx with Persistent ****Volume!**</h1>
-
-**    **<p>**This content is stored in a Persistent Volume and will persist even if the Pod is ****terminated.**</p>
-
-**  **</body>
-
-</html>
-
-Αφού δημιουργήσουμε το PVC, μπορούμε να δημιουργήσουμε το Pod που θα χρησιμοποιεί το Persistent Volume μέσω του PVC και θα σερβίρει το αρχείο index.html. Αυτό γίνεται με το αρχείο nginx-pod.yaml με το παρακάτω περιεχόμενο:
-
-**apiVersion**: v1
-
-**kind**: Pod
-
-**metadata**:
-
-**  name**: nginx-pod
-
-**spec**:
-
-**  containers**:
-
-**    - name**: nginx
-
-**      image**: nginx:latest
-
-**      ****volumeMounts**:
-
-**        - ****mountPath**: /usr/share/nginx/html
-
-**          name**: nginx-storage
-
-**  volumes**:
-
-**    - name**: nginx-storage
-
-**      ****persistentVolumeClaim**:
-
-**        ****claimName**: nginx-pvc
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+spec:
+  containers:
+    - name: nginx
+      image: nginx:latest
+      volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: nginx-storage
+  volumes:
+    - name: nginx-storage
+      persistentVolumeClaim:
+        claimName: nginx-pvc
+```
 
 Για να δημιουργήσετε το Nginx Pod στον cluster σας, εκτελέστε την παρακάτω εντολή:
 
@@ -304,15 +290,15 @@ kubectl apply -f nginx-pvc.yaml
 kubectl apply -f nginx-pod.yaml
 ```
 
-Αυτή η εντολή δημιουργεί το Pod με όνομα nginx-pod, το οποίο χρησιμοποιεί το PVC για να αποθηκεύσει δεδομένα στον κατάλογο /usr/share/nginx/html.
+Αυτή η εντολή δημιουργεί το Pod με όνομα `nginx-pod`, το οποίο χρησιμοποιεί το PVC για να αποθηκεύσει δεδομένα στον κατάλογο `/usr/share/nginx/html`.
 
-Αντιγράψτε το αρχείο index.html στο Persistent Volume στον κατάλογο /usr/share/nginx/html του Pod. Αυτό μπορεί να γίνει χρησιμοποιώντας το kubectl cp
+Αντιγράψτε το αρχείο `index.html` στο Persistent Volume στον κατάλογο `/usr/share/nginx/html` του Pod. Αυτό μπορεί να γίνει χρησιμοποιώντας το `kubectl cp`
 
 ```bash
 kubectl cp index.html nginx-pod:/usr/share/nginx/html/index.html
 ```
 
-Αυτή η εντολή μεταφέρει από το τοπικό σύστημα αρχείων του χρήστη το αρχείο index.html και το τοποθετεί στον κατάλογο /usr/share/nginx/html του nginx-pod. Σε αυτόν τον κατάλογο έχει προσαρτηθεί ένας μόνιμος τόμος αρχείων (persistent volume).
+Αυτή η εντολή μεταφέρει από το τοπικό σύστημα αρχείων του χρήστη το αρχείο `index.html` και το τοποθετεί στον κατάλογο `/usr/share/nginx/html` του `nginx-pod`. Σε αυτόν τον κατάλογο έχει προσαρτηθεί ένας μόνιμος τόμος αρχείων (persistent volume).
 
 Αν τώρα επισκεφτείτε την IP του Nginx Pod θα μπορείτε να δείτε την παρακάτω σελίδα. 
 
@@ -324,7 +310,7 @@ kubectl get pod nginx-pod -o wide
 
 και ανοίξτε στον browser την σελίδα http://<podip>
 
-Ακόμα και αν το Pod τερματιστεί και δημιουργηθεί ξανά, το αρχείο index.html θα είναι διαθέσιμο και ο Nginx θα το σερβίρει. Ας καταστρέψουμε το pod 
+Ακόμα και αν το Pod τερματιστεί και δημιουργηθεί ξανά, το αρχείο `index.html` θα είναι διαθέσιμο και ο Nginx θα το σερβίρει. Ας καταστρέψουμε το pod 
 
 ```bash
 kubectl delete pod nginx-pod
@@ -344,29 +330,24 @@ kubectl get pod nginx-pod -o wide
 
 Και ας ανοίξουμε πάλι τον browser στη νέα διεθύνση: http://<podip>
 
-Βλέπουμε ότι η σελίδα **παραμένει**** και μετά την καταστροφή του ****pod**!!!!
+Βλέπουμε ότι η σελίδα **παραμένει**** και μετά την καταστροφή του **pod**!!!!
 
-**Δημιουργία ****Nginx**** ****Pod**** χωρίς ****PVC**** και (Εφήμερη Αποθήκευση)**
+**Δημιουργία Nginx Pod χωρίς PVC και (Εφήμερη Αποθήκευση)**
 
-Τώρα, ας δημιουργήσουμε ένα Nginx Pod που χρησιμοποιεί emptyDir, που σημαίνει ότι τα δεδομένα θα χάνονται όταν το Pod τερματίσει.
+Τώρα, ας δημιουργήσουμε ένα Nginx Pod χωρίς persistent volume, που σημαίνει ότι τα δεδομένα θα χάνονται όταν το Pod τερματίσει.
 
-Το αρχείο nginx-pod-ephemeral.yaml για το Nginx Pod που δεν έχει persistent storage περιέχει τα εξής:
+Το αρχείο `nginx-pod-ephemeral.yaml` για το Nginx Pod που δεν έχει persistent storage περιέχει τα εξής:
 
-**apiVersion**: v1
-
-**kind**: Pod
-
-**metadata**:
-
-**  name**: nginx-pod-ephemeral
-
-**spec**:
-
-**  containers**:
-
-**    - ****name**: nginx
-
-**      ****image**: nginx:latest
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod-ephemeral
+spec:
+  containers:
+    - name: nginx
+      image: nginx:latest
+```
 
 Για να δημιουργήσετε το Pod, εκτελέστε την εντολή:
 
@@ -374,7 +355,7 @@ kubectl get pod nginx-pod -o wide
 kubectl apply -f nginx-pod-ephemeral.yaml
 ```
 
-Αντιγράφουμε το ίδιο αρχείο index.html στον κατάλογο /usr/share/nginx/html του νέου Pod:
+Αντιγράφουμε το ίδιο αρχείο `index.html` στον κατάλογο `/usr/share/nginx/html` του νέου Pod:
 
 ```bash
 kubectl cp index.html nginx-pod-ephemeral:/usr/share/nginx/html/index.html
@@ -400,89 +381,67 @@ kubectl delete pod nginx-pod-ephemeral
 kubectl apply -f nginx-pod-ephemeral.yaml
 ```
 
-Αν επισκεφτείτε ξανά τη σελίδα στον browser σας, θα δείτε την default σελίδα ενός nginx pod (Welcome to nginx!) διότι τα δεδομένα (το αρχείο index.html) έχουν χαθεί λόγω του ότι το σύστημα αρχείων του pod είναι εφήμερο και τα δεδομένα διαγράφονται όταν το Pod τερματίζεται
+Αν επισκεφτείτε ξανά τη σελίδα στον browser σας, θα δείτε την default σελίδα ενός nginx pod (Welcome to nginx!) διότι τα δεδομένα (το αρχείο `index.html`) έχουν χαθεί λόγω του ότι το σύστημα αρχείων του pod είναι εφήμερο και τα δεδομένα διαγράφονται όταν το Pod τερματίζεται
 
-**🧹**** Καθαρισμός της υποδομής (****Cleanup****)**
+**🧹 Καθαρισμός της υποδομής (Cleanup)**
 
 Αφού ολοκληρώσετε τις δοκιμές και επιβεβαιώσετε τη διαφορά μεταξύ μόνιμης και προσωρινής αποθήκευσης, μπορείτε να διαγράψετε τους πόρους που δημιουργήσατε με τις παρακάτω εντολές:
 
 # Διαγραφή των Pods
 
 ```bash
+# Διαγραφή των Pods
 kubectl delete pod nginx-pod
-```
-
-```bash
 kubectl delete pod nginx-pod-ephemeral
-```
-
-
 
 # Διαγραφή του PersistentVolumeClaim (PVC)
-
-```bash
 kubectl delete pvc nginx-pvc
 ```
 
-ReplicaSets (Αντίγραφα)
+## 5. ReplicaSets (Αντίγραφα)
 
 Το **ReplicaSet** είναι ένα αντικείμενο ελέγχου στο Kubernetes που διασφαλίζει ότι ένα καθορισμένο πλήθος αντιγράφων (Pods) μιας εφαρμογής εκτελούνται πάντα στο cluster. Αν ένα Pod αποτύχει ή τερματιστεί, το ReplicaSet δημιουργεί αυτόματα ένα νέο για να διατηρήσει την επιθυμητή κατάσταση σύμφωνα με την πρόθεση (intent) του χρήστη.
 
 **Λειτουργία και Χαρακτηριστικά**
 
-**Διατήρηση επιθυμητού αριθμού ****Pods**: Αν κάποιο Pod διαγραφεί ή αποτύχει, το ReplicaSet το αντικαθιστά.
-
-**Χρήση ****Label**** ****Selectors**: Τα ReplicaSets χρησιμοποιούν label selectors για να εντοπίσουν ποια Pods πρέπει να διαχειριστούν.
-
-**Αυτόματη Κλιμάκωση**: Μπορούμε να προσαρμόσουμε το μέγεθος του ReplicaSet αυξάνοντας ή μειώνοντας τον αριθμό των Pods.
-
-**Μέρος ενός ****Deployment**: Συνήθως, τα ReplicaSets χρησιμοποιούνται μέσω των Deployments για πιο ευέλικτη διαχείριση εφαρμογών.
+- **Διατήρηση επιθυμητού αριθμού Pods**: Αν κάποιο Pod διαγραφεί ή αποτύχει, το ReplicaSet το αντικαθιστά.
+- **Χρήση Label Selectors**: Τα ReplicaSets χρησιμοποιούν label selectors για να εντοπίσουν ποια Pods πρέπει να διαχειριστούν.
+- **Αυτόματη Κλιμάκωση**: Μπορούμε να προσαρμόσουμε το μέγεθος του ReplicaSet αυξάνοντας ή μειώνοντας τον αριθμό των Pods.
+- **Μέρος ενός Deployment**: Συνήθως, τα ReplicaSets χρησιμοποιούνται μέσω των Deployments για πιο ευέλικτη διαχείριση εφαρμογών.
 
 Περιηγηθείτε στον κατάλογο του παραδείγματος
 
+```bash
 cd ~/cloud-uth/code/05_replicaset
+```
 
 **Παράδειγμα YAML Αρχείου**
 
-Παρακάτω δίνεται ένα αρχείο my-replicaset.yaml με ένα παράδειγμα ορισμού ενός ReplicaSet που διατηρεί 3 αντίγραφα ενός Pod:
+Παρακάτω δίνεται ένα αρχείο `my-replicaset.yaml` με ένα παράδειγμα ορισμού ενός ReplicaSet που διατηρεί 3 αντίγραφα ενός Pod:
 
-**apiVersion**: apps/v1
+```yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: my-replicaset
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: nginx:latest
+```
 
-**kind**: ReplicaSet
+Εντολές Διαχείρισης **ReplicaSets**
 
-**metadata**:
-
-**  name**: my-replicaset
-
-**spec**:
-
-**  replicas**: 3
-
-**  selector**:
-
-**    ****matchLabels**:
-
-**      app**: my-app
-
-**  template**:
-
-**    metadata**:
-
-**      labels**:
-
-**        app**: my-app
-
-**    spec**:
-
-**      containers**:
-
-**      - name**: my-container
-
-**        image**: nginx:latest
-
-**Εντολές Διαχείρισης ****ReplicaSets**
-
-**Δημιουργία ****ReplicaSet**:
+**Δημιουργία ReplicaSet**:
 
 ```bash
 kubectl apply -f my-replicaset.yaml
@@ -494,89 +453,69 @@ kubectl apply -f my-replicaset.yaml
 kubectl get replicaset
 ```
 
-**Κλιμάκωση (****Scaling****) των ****Pods**:
+**Κλιμάκωση (Scaling) των Pods**:
 
 ```bash
 kubectl scale --replicas=5 rs/my-replicaset
 ```
 
-**Βέλτιστες Πρακτικές**** ****– Σύνοψη**
+**Βέλτιστες Πρακτικές – Σύνοψη**
 
-**Χρήση ****Deployments**** αντί για ****ReplicaSets****: **Αν και μπορούμε να χρησιμοποιήσουμε ReplicaSets ανεξάρτητα, τα Deployments παρέχουν επιπλέον δυνατότητες όπως rolling updates και rollbacks.
+- **Χρήση Deployments αντί για ReplicaSets**: Αν και μπορούμε να χρησιμοποιήσουμε ReplicaSets ανεξάρτητα, τα Deployments παρέχουν επιπλέον δυνατότητες όπως rolling updates και rollbacks.
+- **Ορισμός κατάλληλων label selectors**: Πρέπει να βεβαιωνόμαστε ότι το ReplicaSet διαχειρίζεται τα σωστά Pods.
+- **Monitoring & Logging**: Χρησιμοποιήστε εργαλεία όπως `kubectl describe rs` και `kubectl logs` για την παρακολούθηση της κατάστασης.
+- **Σύνοψη**: Το ReplicaSet είναι ένας βασικός μηχανισμός του Kubernetes για τη διατήρηση της επιθυμητής κατάστασης των Pods. Ωστόσο, στις περισσότερες περιπτώσεις, είναι προτιμότερο να χρησιμοποιούμε Deployments για μεγαλύτερη ευελιξία και ευκολία στη διαχείριση εφαρμογών.
 
-**Ορισμός κατάλληλων ****label**** ****selectors****: **Πρέπει να βεβαιωνόμαστε ότι το ReplicaSet διαχειρίζεται τα σωστά Pods.
-
-**Monitoring**** & ****Logging****: **Χρησιμοποιήστε εργαλεία όπως kubectl describe rs και kubectl logs για την παρακολούθηση της κατάστασης.
-
-**Σύνοψη****: **Το ReplicaSet είναι ένας βασικός μηχανισμός του Kubernetes για τη διατήρηση της επιθυμητής κατάστασης των Pods. Ωστόσο, στις περισσότερες περιπτώσεις, είναι προτιμότερο να χρησιμοποιούμε Deployments για μεγαλύτερη ευελιξία και ευκολία στη διαχείριση εφαρμογών.
-
-**🧹**** Καθαρισμός της υποδομής (****Cleanup****)**
-
-# Διαγραφή του ReplicaSet και των Pods που διαχειρίζεται
+**🧹 Καθαρισμός της υποδομής (Cleanup)**
 
 ```bash
+# Διαγραφή του ReplicaSet και των Pods που διαχειρίζεται
 kubectl delete rs my-replicaset
 ```
 
-Deployments στο Kubernetes
+## 06. Deployments στο Kubernetes
 
-**Εισαγωγή στα ****Deployments****: **Τα Deployments στο Kubernetes αποτελούν έναν ανώτερο μηχανισμό διαχείρισης Pods σε σύγκριση με τα ReplicaSets. Παρέχουν δυνατότητες όπως ελεγχόμενες ενημερώσεις, rollback σε προηγούμενες εκδόσεις και αυτοματοποίηση της διαδικασίας ανάπτυξης εφαρμογών.
+**Εισαγωγή στα **Deployments**: Τα Deployments στο Kubernetes αποτελούν έναν ανώτερο μηχανισμό διαχείρισης Pods σε σύγκριση με τα ReplicaSets. Παρέχουν δυνατότητες όπως ελεγχόμενες ενημερώσεις, rollback σε προηγούμενες εκδόσεις και αυτοματοποίηση της διαδικασίας ανάπτυξης εφαρμογών.
 
-**Διαφορές μεταξύ ****Deployments**** και ****ReplicaSets**
+Διαφορές μεταξύ **Deployments** και **ReplicaSets**
 
 Τα ReplicaSets διαχειρίζονται μόνο τον αριθμό των Pods που πρέπει να τρέχουν, ενώ τα Deployments προσφέρουν ένα επιπλέον επίπεδο αφαίρεσης, επιτρέποντας τη διαχείριση ενημερώσεων εφαρμογών. Συγκεκριμένα:
 
-**ReplicaSets**** **διασφαλίζουν ότι ένας καθορισμένος αριθμός Pods είναι πάντα διαθέσιμος.
-
-**Deployments**** **δημιουργούν και διαχειρίζονται ReplicaSets, επιτρέποντας αναβαθμίσεις έκδοσης και rollback σε προηγούμενες εκδόσεις.
-
-Με ένα Deployment μπορούμε να αλλάζουμε την εικόνα του container χωρίς να χρειάζεται χειροκίνητη διαχείριση των ReplicaSets.
+- **ReplicaSets** διασφαλίζουν ότι ένας καθορισμένος αριθμός Pods είναι πάντα διαθέσιμος.
+- **Deployments** δημιουργούν και διαχειρίζονται ReplicaSets, επιτρέποντας αναβαθμίσεις έκδοσης και rollback σε προηγούμενες εκδόσεις.
+- Με ένα Deployment μπορούμε να αλλάζουμε την εικόνα του container χωρίς να χρειάζεται χειροκίνητη διαχείριση των ReplicaSets.
 
 Περιηγηθείτε στον κατάλογο του παραδείγματος
 
+```bash
 cd ~/cloud-uth/code/06_deployments
+```
 
-**Δημιουργία ****Deployment**
+Δημιουργία **Deployment**
 
-Παράδειγμα αρχείου basic-deployment.yaml για ένα Deployment:
+Παράδειγμα αρχείου `basic-deployment.yaml` για ένα Deployment:
 
-**apiVersion**: apps/v1
-
-**kind**: Deployment
-
-**metadata**:
-
-**  name**: my-deployment
-
-**spec**:
-
-**  replicas**: 3
-
-**  selector**:
-
-**    ****matchLabels**:
-
-**      app**: my-app
-
-**  template**:
-
-**    metadata**:
-
-**      labels**:
-
-**        app**: my-app
-
-**    spec**:
-
-**      containers**:
-
-**      - name**: my-container
-
-**        image**: nginx:latest
-
-**        ****ports**:
-
-**        ****- ****containerPort**: 80
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+```
 
 Για να εκτελέσετε το παραπάνω deployment:
 
@@ -592,67 +531,45 @@ kubectl get pods -o wide
 
 Θα δείτε τρία Pods με το label app=my-app να εκτελούνται.
 
-**Πρόσθετες Χρήσεις των ****Deployments**
+Πρόσθετες Χρήσεις των **Deployments**
 
 Τα Deployments μπορούν να χρησιμοποιηθούν για διάφορους σκοπούς πέρα από την απλή εκκίνηση εφαρμογών:
 
 **Rolling**** ****Updates****:** Επιτρέπουν σταδιακή αναβάθμιση της εφαρμογής χωρίς διακοπή της υπηρεσίας. Δημιουργήστε το παρακάτω αρχείο myrolling_deployment.yaml με τα παρακάτω
 
-Για να κάνετε μια σταδιακή μετάβαση από την παλιά έκδοση του Nginx σε μια νέα έκδοση, απλά πρέπει να τροποποιήσετε την παράμετρο image στο Deployment. Ακολουθεί ένα παράδειγμα όπου η παλιά έκδοση του Nginx είναι η nginx:1.14 και θα αναβαθμιστεί στη νέα έκδοση nginx:latest με σταδιακή ενημέρωση μέσω rolling update.
+Για να κάνετε μια σταδιακή μετάβαση από την παλιά έκδοση του Nginx σε μια νέα έκδοση, απλά πρέπει να τροποποιήσετε την παράμετρο `image` στο `Deployment`. Ακολουθεί ένα παράδειγμα όπου η παλιά έκδοση του Nginx είναι η `nginx:1.14` και θα αναβαθμιστεί στη νέα έκδοση `nginx:latest` με σταδιακή ενημέρωση μέσω `rolling update`.
 
-**Παράδειγμα ****YAML**** με ****Rolling**** ****Update**** (Αναβάθμιση από παλιά σε νέα έκδοση του ****Nginx****):**
+**Παράδειγμα YAML με Rolling Update (Αναβάθμιση από παλιά σε νέα έκδοση του Nginx):**
 
-**apiVersion**: apps/v1
-
-**kind**: Deployment
-
-**metadata**:
-
-**  name**: my-deployment
-
-**spec**:
-
-**  replicas**: 3
-
-**  selector**:
-
-**    ****matchLabels**:
-
-**      app**: my-app
-
-**  template**:
-
-**    metadata**:
-
-**      labels**:
-
-**        app**: my-app
-
-**    spec**:
-
-**      containers**:
-
-**      - name**: my-container
-
-**        image**: nginx:1.14  # Παλιά έκδοση του Nginx
-
-**        ports**:
-
-**        - ****containerPort**: 80
-
-**  strategy**:
-
-**    type**: RollingUpdate
-
-**    ****rollingUpdate**:
-
-**      ****maxSurge**: 1              # Μέγιστος αριθμός επιπλέον pods που μπορούν να δημιουργηθούν κατά τη διάρκεια του update
-
-**      ****maxUnavailable**: 1        # Μέγιστος αριθμός pods που μπορούν να είναι μη διαθέσιμα κατά την ενημέρωση
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: nginx:1.14  # Παλιά έκδοση του Nginx
+        ports:
+        - containerPort: 80
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1              # Μέγιστος αριθμός επιπλέον pods που μπορούν να δημιουργηθούν κατά τη διάρκεια του update
+      maxUnavailable: 1        # Μέγιστος αριθμός pods που μπορούν να είναι μη διαθέσιμα κατά την ενημέρωση
+```
 
 
-
-**Εκτέλεση****:**
+**Εκτέλεση:**
 
 ```bash
 kubectl apply -f myrolling_deployment.yaml
@@ -660,21 +577,23 @@ kubectl apply -f myrolling_deployment.yaml
 
 **Αποτέλεσμα:** Εγκαθίσταται το deployment με παλιά έκδοση nginx.
 
-**Βήματα για την Αναβάθμιση σε Νέα Έκδοση (****nginx:latest****):**
+**Βήματα για την Αναβάθμιση σε Νέα Έκδοση (nginx:latest):**
 
-Αρχικά, η παλιά έκδοση (nginx:1.14) είναι σε λειτουργία.
+Αρχικά, η παλιά έκδοση (`nginx:1.14`) είναι σε λειτουργία.
 
-**Τροποποιούμε την έκδοση του ****Nginx**** στο ****YAML**** **myrolling_deployment.yaml** ώστε να χρησιμοποιεί την τελευταία έκδοση (**nginx:latest**)**:
+Τροποποιούμε την έκδοση του Nginx στο YAML `myrolling_deployment.yaml ώστε να χρησιμοποιεί την τελευταία έκδοση `nginx:latest`:
 
-**image**: nginx:latest  # Νέα έκδοση του Nginx
+```yaml
+image: nginx:latest  # Νέα έκδοση του Nginx
+```
 
-**Ανανεώνουμε το ****Deployment**: Αφού κάνετε αυτή την αλλαγή, θα πρέπει να ενημερώσετε το Deployment χρησιμοποιώντας την εντολή kubectl apply.
+Ανανεώνουμε το ****Deployment**: Αφού κάνετε αυτή την αλλαγή, θα πρέπει να ενημερώσετε το Deployment χρησιμοποιώντας την εντολή `kubectl apply`.
 
 ```bash
 kubectl apply -f myrolling_deployment.yaml
 ```
 
-Το Kubernetes θα πραγματοποιήσει μια σταδιακή μετάβαση από την παλιά έκδοση nginx:1.14 στην νέα έκδοση nginx:latest χρησιμοποιώντας rolling update, δημιουργώντας νέα pods με τη νέα έκδοση και καταργώντας σταδιακά τα παλιά pods.
+Το Kubernetes θα πραγματοποιήσει μια σταδιακή μετάβαση από την παλιά έκδοση `nginx:1.14` στην νέα έκδοση `nginx:latest` χρησιμοποιώντας `rolling update`, δημιουργώντας νέα pods με τη νέα έκδοση και καταργώντας σταδιακά τα παλιά pods.
 
 **Παρακολούθηση της ενημέρωσης:**
 
@@ -684,7 +603,7 @@ kubectl apply -f myrolling_deployment.yaml
 kubectl rollout status deployment/my-deployment
 ```
 
-**Rollback**** σε προηγούμενη έκδοση:** Επιστροφή σε προηγούμενο ReplicaSet αν εντοπιστεί πρόβλημα.
+**Rollback** σε προηγούμενη έκδοση: Επιστροφή σε προηγούμενο ReplicaSet αν εντοπιστεί πρόβλημα.
 
 ```bash
 kubectl rollout undo deployment my-deployment
@@ -692,203 +611,138 @@ kubectl rollout undo deployment my-deployment
 
 **Αποτέλεσμα:** Το Deployment θα επιστρέψει στην προηγούμενη σταθερή έκδοση.
 
-**Με την παρακάτω εντολή βλέπουμε τις διαφορετικές εκδόσεις του ****deployment****: **
+Με την παρακάτω εντολή βλέπουμε τις διαφορετικές εκδόσεις του deployment:
 
 ```bash
 kubectl rollout history deployment my-deployment
 ```
 
-**Blue-Green**** ****Deployments****: **Ταυτόχρονη ύπαρξη δύο εκδόσεων μιας εφαρμογής για γρήγορη μετάβαση μεταξύ τους.
+**Blue-Green Deployments**: Ταυτόχρονη ύπαρξη δύο εκδόσεων μιας εφαρμογής για γρήγορη μετάβαση μεταξύ τους.
 
-Αρχείο blue-deployment.yaml
+Αρχείο `blue-deployment.yaml`
 
-**apiVersion**: apps/v1
-
-**kind**: Deployment
-
-**metadata**:
-
-**  name**: blue-deployment
-
-**spec**:
-
-**  replicas**: 3
-
-**  selector**:
-
-**    ****matchLabels**:
-
-**      app**: my-app
-
-**  template**:
-
-**    metadata**:
-
-**      labels**:
-
-**        app**: my-app
-
-**    spec**:
-
-**      containers**:
-
-**      - name**: my-container
-
-**        image**: nginx:1.14
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blue-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: nginx:1.14
+```
 
 
+Αρχείο `green-deployment.yaml`
 
-Αρχείο green-deployment.yaml
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: green-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: nginx:latest
+```
 
-**apiVersion**: apps/v1
 
-**kind**: Deployment
-
-**metadata**:
-
-**  name**: green-deployment
-
-**spec**:
-
-**  replicas**: 3
-
-**  selector**:
-
-**    ****matchLabels**:
-
-**      app**: my-app
-
-**  template**:
-
-**    metadata**:
-
-**      labels**:
-
-**        app**: my-app
-
-**    spec**:
-
-**      containers**:
-
-**      - name**: my-container
-
-**        image**: nginx:latest
-
-**Εκτέλεση****:**
+**Εκτέλεση:**
 
 ```bash
 kubectl apply -f blue-deployment.yaml
-```
-
-```bash
 kubectl apply -f green-deployment.yaml
 ```
 
-**Αποτέλεσμα: **Και οι δύο εκδόσεις θα εκτελούνται ταυτόχρονα, επιτρέποντας γρήγορη μετάβαση μέσω αλλαγής του Service selector.
+**Αποτέλεσμα:** Και οι δύο εκδόσεις θα εκτελούνται ταυτόχρονα, επιτρέποντας γρήγορη μετάβαση μέσω αλλαγής του Service selector.
 
 Με αυτά τα χαρακτηριστικά, τα Deployments παρέχουν μια ευέλικτη και αξιόπιστη μέθοδο διαχείρισης εφαρμογών στο Kubernetes.
 
-**🧹**** Καθαρισμός της υποδομής (****Cleanup****)**
+**🧹 Καθαρισμός της υποδομής (Cleanup)**
 
 Αφού ολοκληρώσετε τις δοκιμές με τα Deployments, τα rolling updates και τα blue-green deployments, μπορείτε να καθαρίσετε την υποδομή εκτελώντας τις παρακάτω εντολές:
 
-# Διαγραφή Deployment που χρησιμοποιήθηκε για απλό και για rolling update
-
 ```bash
+# Διαγραφή Deployment που χρησιμοποιήθηκε για απλό και για rolling update
 kubectl delete -f basic-deployment.yaml
-```
-
-
 
 # Διαγραφή των Blue-Green Deployments
-
-```bash
 kubectl delete -f blue-deployment.yaml
-```
-
-```bash
 kubectl delete -f green-deployment.yaml
 ```
 
-StatefulSets στο Kubernetes
 
-**Εισαγωγή στα ****StatefulSets****: **Τα StatefulSets στο Kubernetes χρησιμοποιούνται για τη διαχείριση εφαρμογών που απαιτούν διατήρηση της κατάστασης (stateful applications). Σε αντίθεση με τα Deployments και τα ReplicaSets, τα StatefulSets εγγυώνται σταθερή ταυτότητα (σταθερά ονόματα Pods) και διατηρούν την αποθήκευση δεδομένων ακόμα και μετά την επανεκκίνηση των Pods (persistent volumes).
+## 7. StatefulSets στο Kubernetes
 
-**Διαφορές μεταξύ ****StatefulSets**** και ****Deployments**
+**Εισαγωγή στα StatefulSets**: Τα StatefulSets στο Kubernetes χρησιμοποιούνται για τη διαχείριση εφαρμογών που απαιτούν διατήρηση της κατάστασης (stateful applications). Σε αντίθεση με τα Deployments και τα ReplicaSets, τα StatefulSets εγγυώνται σταθερή ταυτότητα (σταθερά ονόματα Pods) και διατηρούν την αποθήκευση δεδομένων ακόμα και μετά την επανεκκίνηση των Pods (persistent volumes).
 
-**Σταθερά Ονόματα ****Pods****: **Τα Pods σε ένα StatefulSet λαμβάνουν σταθερά ονόματα με αύξουσα αρίθμηση (π.χ. my-app-0, my-app-1).
+**Διαφορές μεταξύ StatefulSets και Deployments**
 
-**Σταθερ****οί**** ****Persistent**** ****Volumes****: **Κάθε Pod έχει τον δικό του volume (τόμο), ο οποίος δεν διαγράφεται αυτόματα όταν το Pod τερματιστεί.
-
-**Τακτική Εκκίνηση & Τερματισμός: **Τα Pods εκκινούνται και τερματίζονται διαδοχικά, με συγκεκριμένη σειρά.
+- **Σταθερά Ονόματα Pods**: Τα Pods σε ένα StatefulSet λαμβάνουν σταθερά ονόματα με αύξουσα αρίθμηση (π.χ. my-app-0, my-app-1).
+- **Σταθεροί Persistent Volumes**: Κάθε Pod έχει τον δικό του volume (τόμο), ο οποίος δεν διαγράφεται αυτόματα όταν το Pod τερματιστεί.
+- **Τακτική Εκκίνηση & Τερματισμός**: Τα Pods εκκινούνται και τερματίζονται διαδοχικά, με συγκεκριμένη σειρά.
 
 Περιηγηθείτε στον κατάλογο του παραδείγματος
 
+```bash
 cd ~/cloud-uth/code/07_statefulsets
+```
 
-**Δημιουργία ****StatefulSet**
+**Δημιουργία StatefulSet**
 
-**Παράδειγμα αρχείου **statefulset.yaml** ****για ένα ****StatefulSet****:**
+Παράδειγμα αρχείου `statefulset.yaml` για ένα StatefulSet:
 
-**apiVersion**: apps/v1
+```yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: my-statefulset
+spec:
+  serviceName: "my-service"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: nginx:latest
+        volumeMounts:
+        - name: my-volume
+          mountPath: /data
+  volumeClaimTemplates:
+  - metadata:
+      name: my-volume
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+```
 
-**kind**: StatefulSet
-
-**metadata**:
-
-**  name**: my-statefulset
-
-**spec**:
-
-**  ****serviceName**: "my-service"
-
-**  replicas**: 3
-
-**  selector**:
-
-**    ****matchLabels**:
-
-**      app**: my-app
-
-**  template**:
-
-**    metadata**:
-
-**      labels**:
-
-**        app**: my-app
-
-**    spec**:
-
-**      containers**:
-
-**      - name**: my-container
-
-**        image**: nginx:latest
-
-**        ****volumeMounts**:
-
-**        - name**: my-volume
-
-**          ****mountPath**: /data
-
-**  ****volumeClaimTemplates**:
-
-**  - metadata**:
-
-**      name**: my-volume
-
-**    spec**:
-
-**      ****accessModes**: [ "ReadWriteOnce" ]
-
-**      resources**:
-
-**        requests**:
-
-**          storage**: 1Gi
-
-**Εκτέλεση του ****StatefulSet**
+**Εκτέλεση του **StatefulSet**
 
 ```bash
 kubectl apply -f statefulset.yaml
@@ -900,7 +754,7 @@ kubectl apply -f statefulset.yaml
 kubectl get pods
 ```
 
-Θα παρατηρήσετε ότι τα Pods έχουν ονόματα όπως my-statefulset-0, my-statefulset-1, my-statefulset-2 και εκκινούνται διαδοχικά.
+Θα παρατηρήσετε ότι τα Pods έχουν ονόματα όπως `my-statefulset-0`, `my-statefulset-1`, `my-statefulset-2` και εκκινούνται διαδοχικά.
 
 Για να δείτε τα Persistent Volumes που έχουν δημιουργηθεί:
 
@@ -908,9 +762,9 @@ kubectl get pods
 kubectl get pvc
 ```
 
-Θα παρατηρήσετε ότι κάθε Pod έχει το δικό του Persistent Volume (my-volume-my-statefulset-0, my-volume-my-statefulset-1, κ.ο.κ.), το οποίο είναι μόνιμα συνδεδεμένο στο αντίστοιχο Pod ακόμα και μετά τον τερματισμό του.
+Θα παρατηρήσετε ότι κάθε Pod έχει το δικό του Persistent Volume (`my-volume-my-statefulset-0`, `my-volume-my-statefulset-1`, κ.ο.κ.), το οποίο είναι μόνιμα συνδεδεμένο στο αντίστοιχο Pod ακόμα και μετά τον τερματισμό του.
 
-**Επαλήθευση διατήρησης δεδομένων στα ****Persistent**** ****Volumes****: **Για να δοκιμάσουμε αν ένα Persistent Volume διατηρεί τα δεδομένα του ακόμα και μετά τον τερματισμό του Pod, εκτελέστε τις εξής εντολές:
+**Επαλήθευση διατήρησης δεδομένων στα Persistent Volumes:** Για να δοκιμάσουμε αν ένα Persistent Volume διατηρεί τα δεδομένα του ακόμα και μετά τον τερματισμό του Pod, εκτελέστε τις εξής εντολές:
 
 ```bash
 kubectl exec -it my-statefulset-0 -- /bin/sh
@@ -921,8 +775,9 @@ kubectl exec -it my-statefulset-0 -- /bin/sh
 ```bash
 echo "Hello Kubernetes" > /data/testfile.txt
 ```
-
+```bash
 exit
+```
 
 Τώρα, διαγράψτε το Pod:
 
@@ -946,125 +801,79 @@ cat /data/testfile.txt
 
 Πρόσθετες Χρήσεις των StatefulSets: Τα StatefulSets είναι κατάλληλα για εφαρμογές που απαιτούν συγκεκριμένη σειρά εκκίνησης και σταθερή αποθήκευση, όπως:
 
-**Βάσεις Δεδομένων **(π.χ. MySQL, PostgreSQL, MongoDB)
-
-**Distributed Systems **(π.χ. Kafka, Zookeeper, Elasticsearch)
-
-**Απ****οθήκευση**** α****ρχείων**
+- **Βάσεις Δεδομένων** (π.χ. MySQL, PostgreSQL, MongoDB)
+- **Distributed Systems** (π.χ. Kafka, Zookeeper, Elasticsearch)
+- **Αποθήκευση αρχείων**
 
 Με την κατάλληλη διαχείριση, τα StatefulSets παρέχουν μια αξιόπιστη λύση για την ανάπτυξη stateful εφαρμογών (εφαρμογών με διατήρηση κατάστασης) στο Kubernetes.
 
-**🧹**** Καθαρισμός της υποδομής (****Cleanup****)**
+**🧹 Καθαρισμός της υποδομής (Cleanup)**
 
 Αφού ολοκληρώσετε τη δοκιμή με το StatefulSet, μπορείτε να καθαρίσετε την υποδομή με τις εξής εντολές:
 
-# Διαγραφή του StatefulSet (τα Pods θα διαγραφούν)
-
 ```bash
+# Διαγραφή του StatefulSet (τα Pods θα διαγραφούν)
 kubectl delete -f statefulset.yaml
-```
-
-
 
 # Έλεγχος αν υπάρχουν ακόμα PVCs (ένα για κάθε Pod)
-
-```bash
 kubectl get pvc
-```
-
-
 
 # Διαγραφή των Persistent Volume Claims που δημιουργήθηκαν αυτόματα
-![Εικόνα 1](images/img11.png)
-
-
-```bash
 kubectl delete pvc my-volume-my-statefulset-0
-```
-
-```bash
 kubectl delete pvc my-volume-my-statefulset-1
-```
-
-```bash
 kubectl delete pvc my-volume-my-statefulset-2
 ```
 
-DaemonSets στο Kubernetes
+## 8. DaemonSets στο Kubernetes
 
-**Εισαγωγή στα ****DaemonSets****:** Τα DaemonSets στο Kubernetes χρησιμοποιούνται για την εκτέλεση Pods σε **κάθε κόμβο** **(****node****)** ενός cluster. Είναι χρήσιμα για εφαρμογές όπως συλλογή logs, monitoring agents και network services που πρέπει να εκτελούνται σε όλους τους κόμβους.
+**Εισαγωγή στα DaemonSets:** Τα DaemonSets στο Kubernetes χρησιμοποιούνται για την εκτέλεση Pods σε **κάθε κόμβο (node)** ενός cluster. Είναι χρήσιμα για εφαρμογές όπως συλλογή logs, monitoring agents και network services που πρέπει να εκτελούνται σε όλους τους κόμβους.
 
 **Διαφορές μεταξύ ****DaemonSets**** και ****Deployments**
 
-**Εκτέλεση σε κάθε Κόμβο: **Σε αντίθεση με τα Deployments, τα DaemonSets διασφαλίζουν ότι κάθε κόμβος έχει ένα αντίγραφο του Pod.
-
-**Αυτόματη Προσθήκη σε Νέους Κόμβους:** Όταν ένας νέος κόμβος προστεθεί στο cluster, το DaemonSet θα εκτελέσει αυτόματα ένα Pod σε αυτόν.
-
-**Δεν χρησιμοποιεί ****ReplicaSets****:** Τα DaemonSets δεν εξαρτώνται από ReplicaSets, καθώς ο αριθμός των Pods βασίζεται μόνο στον αριθμό των κόμβων.
-
+- **Εκτέλεση σε κάθε Κόμβο:** Σε αντίθεση με τα Deployments, τα DaemonSets διασφαλίζουν ότι κάθε κόμβος έχει ένα αντίγραφο του Pod.
+- **Αυτόματη Προσθήκη σε Νέους Κόμβους:** Όταν ένας νέος κόμβος προστεθεί στο cluster, το DaemonSet θα εκτελέσει αυτόματα ένα Pod σε αυτόν.
+- **Δεν χρησιμοποιεί ReplicaSets:** Τα DaemonSets δεν εξαρτώνται από ReplicaSets, καθώς ο αριθμός των Pods βασίζεται μόνο στον αριθμό των κόμβων.
 
 
 Περιηγηθείτε στον κατάλογο του παραδείγματος
 
+```bash
 cd ~/cloud-uth/code/08_daemonsets
+```
 
-**Δημιουργία**** ****ενός**** ****DaemonSet****: **Παράδειγμα αρχείου fluentd-daemonset.yaml για ένα DaemonSet με Fluentd:
+**Δημιουργία *ενός DaemonSet**: Παράδειγμα αρχείου `fluentd-daemonset.yaml` για ένα DaemonSet με Fluentd:
 
-**apiVersion**: apps/v1
+```yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd-daemonset
+spec:
+  selector:
+    matchLabels:
+      name: fluentd-pod
+  template:
+    metadata:
+      labels:
+        name: fluentd-pod
+    spec:
+      containers:
+      - name: fluentd
+        image: fluent/fluentd:v1.14-1
+        resources:
+          limits:
+            memory: 200Mi
+            cpu: 100m
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+      volumes:
+      - name: varlog
+        hostPath:
+          path: /var/log
+```
 
-**kind**: DaemonSet
-
-**metadata**:
-
-**  name**: fluentd-daemonset
-
-**spec**:
-
-**  selector**:
-
-**    ****matchLabels**:
-
-**      name**: fluentd-pod
-
-**  template**:
-
-**    metadata**:
-
-**      labels**:
-
-**        name**: fluentd-pod
-
-**    spec**:
-
-**      containers**:
-
-**      - name**: fluentd
-
-**        image**: fluent/fluentd:v1.14-1
-
-**        resources**:
-
-**          limits**:
-
-**            memory**: 200Mi
-
-**            ****cpu**: 100m
-
-**        ****volumeMounts**:
-
-**        - name**: varlog
-
-**          ****mountPath**: /var/log
-
-**      volumes**:
-
-**      - name**: varlog
-
-**        ****hostPath**:
-
-**          path**: /var/log
-
-**Εκτέλεση του ****DaemonSet****: **Για να εκτελέσετε το DaemonSet, χρησιμοποιήστε την παρακάτω εντολή
+**Εκτέλεση του **DaemonSet**: Για να εκτελέσετε το DaemonSet, χρησιμοποιήστε την παρακάτω εντολή
 
 ```bash
 kubectl apply -f fluentd-daemonset.yaml
@@ -1078,11 +887,11 @@ kubectl get pods -o wide
 
 Θα παρατηρήσετε ότι υπάρχει ένα Fluentd Pod σε κάθε worker node του cluster.
 
-**Συλλογή και εκτύπωση μετρικών με ****Fluentd**
+**Συλλογή και εκτύπωση μετρικών με **Fluentd**
 
 Μπορούμε να χρησιμοποιήσουμε το Fluentd για τη συλλογή μετρικών από όλα τα Pods και τους κόμβους του cluster.
 
-**Προβολή ****logs**** από όλα τα ****Fluentd**** ****Pods**
+**Προβολή logs** από όλα τα **Fluentd Pods**
 
 Για να δείτε τα logs που συλλέγονται από όλους τους κόμβους μέσω του Fluentd, χρησιμοποιήστε:
 
@@ -1092,31 +901,26 @@ kubectl logs -l name=fluentd-pod --all-containers=true --tail=50
 
 Αυτή η εντολή εμφανίζει τα τελευταία 50 logs από όλα τα Fluentd Pods του cluster.
 
-**Πρόσθετες Χρήσεις των ****DaemonSets**
+**Πρόσθετες Χρήσεις των DaemonSets**
 
 Τα DaemonSets είναι χρήσιμα για πολλές περιπτώσεις, όπως:
 
-**Συλλογή ****logs**** **με Fluentd, Logstash ή άλλους agents.
-
-**Monitoring **με Prometheus Node Exporter ή Datadog Agent.
-
-**Network Services **όπως CNI plugins (Calico, Flannel) για δικτύωση στο cluster.
+- **Συλλογή logs** με Fluentd, Logstash ή άλλους agents.
+- **Monitoring** με Prometheus Node Exporter ή Datadog Agent.
+- **Network Services** όπως CNI plugins (Calico, Flannel) για δικτύωση στο cluster.
 
 Με τα DaemonSets, μπορούμε να διασφαλίσουμε ότι όλες οι κρίσιμες υπηρεσίες εκτελούνται ομοιόμορφα σε όλους τους κόμβους του cluster.
 
-
-
-**🧹**** Καθαρισμός της υποδομής (****Cleanup****)**
+**🧹 Καθαρισμός της υποδομής (Cleanup)**
 
 Αφού ολοκληρώσετε τις δοκιμές με το DaemonSet (π.χ. Fluentd σε κάθε node), μπορείτε να καθαρίσετε τους πόρους που δημιουργήσατε με τις παρακάτω εντολές:
 
-# Διαγραφή του DaemonSet
-
 ```bash
+# Διαγραφή του DaemonSet
 kubectl delete -f fluentd-daemonset.yaml
 ```
 
-Secrets
+## 9. Secrets
 
 Τα **Secrets** στο Kubernetes χρησιμοποιούνται για την ασφαλή αποθήκευση ευαίσθητων δεδομένων, όπως κωδικοί πρόσβασης ή API tokens. Σε αυτό το παράδειγμα, θα δούμε πώς μπορούμε να χρησιμοποιήσουμε ένα Secret για να παρέχουμε στοιχεία σύνδεσης σε μια βάση δεδομένων, κάνοντάς τα διαθέσιμα στην εφαρμογή ως αρχεία μέσω ενός volume.
 
