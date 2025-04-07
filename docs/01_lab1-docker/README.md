@@ -192,7 +192,7 @@ docker rmi my-custom-container
 
 Θα δημιουργήσουμε ένα **Docker** **Compose** **setup** με:
 
-- **Nginx**** ως **reverse** **proxy**
+- **Nginx** ως **reverse** **proxy**
 - **Δύο web servers** με απλές HTML σελίδες
 
 Δημιουργία φακέλου εργασίας
