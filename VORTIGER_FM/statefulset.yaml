@@ -1,29 +1,31 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: my-statefulset
+  name: music-server
 spec:
-  serviceName: "my-service"
-  replicas: 3
+  serviceName: "music-server"
+  replicas: 4
   selector:
     matchLabels:
-      app: my-app
+      app: music-server
   template:
     metadata:
       labels:
-        app: my-app
+        app: music-server
     spec:
       containers:
-      - name: my-container
+      - name: music-server
         image: nginx:latest
+        ports:
+        - containerPort: 80
         volumeMounts:
-        - name: my-volume
-          mountPath: /data
+        - name: music-data
+          mountPath: /usr/share/nginx/html/music
   volumeClaimTemplates:
   - metadata:
-      name: my-volume
+      name: music-data
     spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 1Gi
+          storage: 2Gi
