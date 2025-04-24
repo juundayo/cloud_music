@@ -4,7 +4,7 @@ metadata:
   name: music-server
 spec:
   serviceName: "music-server"
-  replicas: 4
+  replicas: 2
   selector:
     matchLabels:
       app: music-server
@@ -29,3 +29,16 @@ spec:
       resources:
         requests:
           storage: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: music-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: music-server
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
