@@ -3,20 +3,25 @@ kind: Deployment
 metadata:
   name: music-server-deployment
 spec:
-  replicas: 10
+  replicas: 1
   selector:
     matchLabels:
-      app: music-server
+      app: music-server-deployment
   template:
     metadata:
       labels:
-        app: music-server
+        app: music-server-deployment
     spec:
       containers:
-      - name: music-server
+      - name: music-server-deployment
         image: webdevops/php-apache:8.1
         ports:
         - containerPort: 80
+        resources:
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 200m
         volumeMounts:
         - name: music-server-content
           mountPath: /app
@@ -27,8 +32,8 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1              # Μέγιστος αριθμός επιπλέον pods που μπορούν να δημιουργηθούν κατά τη διάρκεια του update
-      maxUnavailable: 1        # Μέγιστος αριθμός pods που μπορούν να είναι μη διαθέσιμα κατά την ενημέρωση
+      maxSurge: 2           # Μέγιστος αριθμός επιπλέον pods που μπορούν να δημιουργηθούν κατά τη διάρκεια του update
+      maxUnavailable: 3        # Μέγιστος αριθμός pods που μπορούν να είναι μη διαθέσιμα κατά την ενημέρωση
 ---
 apiVersion: v1
 kind: Service
@@ -37,7 +42,7 @@ metadata:
 spec:
   type: LoadBalancer
   selector:
-    app: music-server
+    app: music-server-deployment
   ports:
   - port: 80
     targetPort: 80
