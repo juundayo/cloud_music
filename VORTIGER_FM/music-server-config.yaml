@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: music-server-content
+data:
+  index.php: |
+    <?php
+    echo "<p> DJFOISJGRUIOERIUGIDLUJFOLKJSDFJKL </p>"
+    ?>
