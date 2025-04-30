@@ -1596,3 +1596,237 @@ kubectl delete -f web-services.yaml
 # Διαγραφή των ConfigMaps για HTML περιεχόμενο
 kubectl delete -f web-configmaps.yaml
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 13. Υπηρεσίες (Services) – Headless και Load-Balanced
+
+Σε αυτή την ενότητα, εξετάζουμε δύο βασικούς τύπους Kubernetes Services: **Headless** και **Load-Balancing (ClusterIP)**. Θα χρησιμοποιήσουμε ένα StatefulSet με δύο pods ως παράδειγμα.
+
+### 🎯 Σκοπός
+
+- Να κατανοήσεις τη διαφορά μεταξύ Headless και Load-Balanced Services.
+- Να εφαρμόσεις στην πράξη τη δημιουργία και χρήση αυτών των υπηρεσιών σε StatefulSet.
+
+### ℹ️ Θεωρητικό υπόβαθρο: ClusterIP και Headless Services
+
+#### 🔹 ClusterIP (Default Service Type)
+
+Το `ClusterIP` είναι ο **προεπιλεγμένος τύπος Service** στο Kubernetes. Το API Server δημιουργεί μια **εικονική IP (Cluster IP)** μέσα στο εσωτερικό δίκτυο του cluster και κατευθύνει την κυκλοφορία στα Pods που ταιριάζουν με το `selector`.
+
+📚 *Τεκμηρίωση:* [ClusterIP - Kubernetes Docs](https://kubernetes.io/docs/concepts/services-networking/service/#type-clusterip)
+
+**Χαρακτηριστικά:**
+- Δημιουργεί μία εικονική IP (`CLUSTER-IP`) που δρομολογεί προς τα pods.
+- Το DNS όνομα του service (`my-service.default.svc.cluster.local`) αντιστοιχεί σε αυτή την IP.
+- Όλη η δρομολόγηση γίνεται εσωτερικά μέσω του `kube-proxy`.
+- Είναι κατάλληλο για χρήση μόνο εντός του cluster.
+- Το service διανέμει το φορτίο εξίσου σε όλα τα Pods με βάση το selector.
+
+
+#### 🔹 Headless Services (`clusterIP: None`)
+
+Όταν ένα Service δηλωθεί ως Headless (με `clusterIP: None`), δεν δημιουργείται καθόλου εικονική IP. Ένα Headless Service δεν δημιουργεί καθόλου `ClusterIP`. Αντ’ αυτού, το DNS επιστρέφει **όλες τις IPs των Pods** που αντιστοιχούν στο `selector`.
+
+📚 *Περισσότερα:* [Headless Services στο Kubernetes documentation](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services)
+
+
+**Χαρακτηριστικά:**
+- Ορίζεται με `clusterIP: None`.
+- Το DNS όνομα επιστρέφει A/AAAA records για **κάθε pod**.
+- Ιδανικό για Stateful εφαρμογές (StatefulSets), databases, εφαρμογές που απαιτούν σταθερή δικτυακή ταυτότητα.
+- Χρήσιμο για clients που θέλουν να επικοινωνούν απευθείας με συγκεκριμένο pod.
+
+
+**Χρήσιμο για:**
+- StatefulSets όπου κάθε pod χρειάζεται μοναδική ταυτότητα.
+- Άμεση επικοινωνία πελάτη με pod (χωρίς kube-proxy).
+- Λύσεις όπως databases, quorum apps κ.λπ.
+
+**DNS Συμπεριφορά:**
+- `my-service.ikons-priv.svc.cluster.local` → A/AAAA records για *κάθε* pod (`pod-0`, `pod-1`, ...).
+- `my-app-headless.ikons-priv.svc.cluster.local` → [10.244.1.12, 10.244.2.15]
+- Δυνατότητα αναφοράς πλήρους DNS π.χ. `pod-0.my-service.ikons-priv.svc.cluster.local`
+- `my-app-0.my-app-headless.ikons-priv.svc.cluster.local` → 10.244.1.12
+
+---
+
+
+
+### 🔧 Δημιουργία Headless και Load-Balanced Services
+
+Ο φάκελος `code/13_services` περιλαμβάνει όλα τα YAML αρχεία που θα χρησιμοποιήσουμε.
+
+
+
+### ✅ Εκτέλεση με Makefile
+
+Χρησιμοποιήστε το `make deploy` για να εφαρμόσετε όλους τους πόρους:
+
+```bash
+make deploy
+```
+
+Αυτό:
+- δημιουργεί το `my-app-headless` (headless service),
+- το `my-app-svc` (ClusterIP service), και
+- το StatefulSet `my-app` με 2 pods (`my-app-0`, `my-app-1`).
+
+---
+
+Για διαγραφή όλων των πόρων, εκτελέστε:
+
+```bash
+make clean
+```
+
+---
+
+### 🔍 Τι να περιμένετε
+
+Μετά την εφαρμογή:
+
+```bash
+kubectl get pods
+```
+🎯 Θα δείτε δύο pods με ονόματα `my-app-0` και `my-app-1`.
+
+```bash
+kubectl get svc
+```
+🎯 Θα δείτε δύο services: `my-app-headless` και `my-app-svc`. Ο δεύτερος έχει `CLUSTER-IP`.
+
+---
+
+
+
+
+### 1️⃣ Headless Service
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-headless
+spec:
+  clusterIP: None
+  selector:
+    app: my-app
+  ports:
+    - port: 80
+      name: http
+      targetPort: 80
+```
+
+### 2️⃣ Load-Balancing Service (ClusterIP)
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: my-app
+  ports:
+    - port: 80
+      targetPort: 80
+```
+
+### 3️⃣ StatefulSet με 2 Pods
+
+```yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: my-app
+spec:
+  serviceName: my-app-headless
+  replicas: 2
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: html-volume
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: html-volume
+          downwardAPI:
+            items:
+              - path: index.html
+                fieldRef:
+                  fieldPath: metadata.name
+```
+
+### 🌐 Δοκιμή μέσω curl command
+
+Αν έχετε VPN σύνδεση με το cluster, εκτελέστε πολλές φορές την παρακάτω εντολή, θα δείτε διαφορετικό `hostname` (pod name) αν λειτουργεί το load balancing.
+
+```bash
+# ⚠️ Αντικατέστησε το 👇 "ikons" με το δικό σου username
+curl curl my-app-svc.ikons-priv.svc.cluster.local
+```
+
+Αντίστοιχα, τρέξτε πολλές φορές την παρακάτω εντολή:
+
+
+```bash
+# ⚠️ Αντικατέστησε το 👇 "ikons" με το δικό σου username
+curl my-app-headless.ikons-priv.svc.cluster.local
+```
+Ομοίως, θα δείτε διαφορετικό `hostname` (pod name) αν λειτουργεί το load balancing, αλλά για  διαφορετικό λόγο: στην περίπτωση αυτή το my-app-headless γίνεται resolve σε δυο διαφορετικά IPs και ο πελάτης curl επιλέγει τυχαία ένα από τα 2.
+
+### 🧪 Δοκιμή DNS Resolution
+
+```bash
+# ⚠️ Αντικατέστησε το 👇 "ikons" με το δικό σου username
+nslookup my-app-svc.ikons-priv.svc.cluster.local
+```
+🎯 Θα επιστρέψει **μία IP** (του ClusterIP).
+
+
+```bash
+# ⚠️ Αντικατέστησε το "ikons" 👇 με το δικό σου username
+nslookup my-app-headless.ikons-priv.svc.cluster.local
+```
+🎯 Θα επιστρέψει **δύο IPs** — μία για κάθε pod.
+
+
+
+```bash
+# ⚠️ Αντικατέστησε το "ikons" 👇 με το δικό σου username
+nslookup my-app-0.my-app-headless.ikons-priv.svc.cluster.local
+```
+🎯 Θα δείξει την IP του συγκεκριμένου pod (`my-app-0`)
+
+
+```bash
+# ⚠️ Αντικατέστησε το "ikons" 👇 με το δικό σου username
+nslookup my-app-1.my-app-headless.ikons-priv.svc.cluster.local
+```
+🎯 Θα δείξει την IP του συγκεκριμένου pod (`my-app-1`)
+
