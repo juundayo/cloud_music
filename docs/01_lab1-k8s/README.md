@@ -1674,10 +1674,10 @@ kubectl delete -f web-configmaps.yaml
 
 ### ✅ Εκτέλεση με Makefile
 
-Χρησιμοποιήστε το `make apply` για να εφαρμόσετε όλους τους πόρους:
+Χρησιμοποιήστε το `make deploy` για να εφαρμόσετε όλους τους πόρους:
 
 ```bash
-make apply
+make deploy
 ```
 
 Αυτό:
@@ -1690,7 +1690,7 @@ make apply
 Για διαγραφή όλων των πόρων, εκτελέστε:
 
 ```bash
-make delete
+make clean
 ```
 
 ---
@@ -1830,17 +1830,3 @@ nslookup my-app-1.my-app-headless.ikons-priv.svc.cluster.local
 ```
 🎯 Θα δείξει την IP του συγκεκριμένου pod (`my-app-1`)
 
-
-### 🛠️ Χρήση Makefile
-
-```makefile
-apply:
-	kubectl apply -f 01-headless-service.yaml
-	kubectl apply -f 02-loadbalancer-service.yaml
-	kubectl apply -f 03-statefulset.yaml
-
-delete:
-	kubectl delete -f 03-statefulset.yaml
-	kubectl delete -f 02-loadbalancer-service.yaml
-	kubectl delete -f 01-headless-service.yaml
-```
