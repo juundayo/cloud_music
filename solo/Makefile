@@ -9,6 +9,7 @@ deploy:
 	kubectl apply -f 05-postgres-service.yaml
 	kubectl apply -f 06-web-content-configmap.yaml
 	kubectl apply -f 07-webserver.yaml
+	kubectl cp music/ postgres:music/songs/
 	kubectl apply -f 08-webserver-service.yaml
 	@echo "✅ Deployment complete."
 

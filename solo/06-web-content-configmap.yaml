@@ -18,7 +18,7 @@ data:
     }
 
     // Get music data
-    $music_result = pg_query($conn, "SELECT * FROM music_data LIMIT 1");
+    $music_result = pg_query($conn, "SELECT * FROM music_data");
     $music = pg_fetch_assoc($music_result);
     ?>
     <!DOCTYPE html>

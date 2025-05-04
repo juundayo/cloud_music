@@ -8,7 +8,7 @@ data:
       id SERIAL PRIMARY KEY,
       name TEXT NOT NULL
     );
-    INSERT INTO my_table (name) VALUES ('Alice'), ('Bob'), ('Charlie');
+    INSERT INTO customer_data (name) VALUES ('Alice'), ('Bob'), ('Charlie');
     CREATE TABLE IF NOT EXISTS music_data (
       id SERIAL PRIMARY KEY,
       artist TEXT NOT NULL,
@@ -17,15 +17,15 @@ data:
       song_name TEXT NOT NULL,
       song_path TEXT NOT NULL
     );
-    INSERT INTO music_data (artist, genre, lyrics, song_name, song_path) 
+    INSERT INTO music_data (artist, genre, lyrics, song_name, song_path)
       VALUES
-      ('Ozaki Kiyohiko', 'Ballad', 
+      ('Ozaki Kiyohiko', 'Ballad',
        '今、今、虹を待つ時\n今、今、船が出る時\n今、今、涙ぐむとき\n\n今、今、私は生きる\n今、今、私は生きる\n今、今、私は生きる\n今、今、今また生きる\n\n二度と帰らぬ時\n今、それが私のいのち\n今、今、このひととき\nあぁ、今、この今こそ',
-       '今今今', '/music/songs/ching.mp3');
-       
+       '今今今', '/music/songs/ching.mp3'),
+
       ('Saijou Hideki', 'Ballad',
       'LYRICS',
-      '君よ抱かれて熱くなれ, '/music/songs/kimiyodakarete.mp3');
+      '君よ抱かれて熱くなれ, '/music/songs/kimiyodakarete.mp3'),
 
       ('batta', 'Rock&Roll',
       'LYRICS',
