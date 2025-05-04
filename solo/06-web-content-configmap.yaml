@@ -245,7 +245,7 @@ data:
                     
                     <div class="player-controls">
                         <audio controls>
-                            <source src="<?php echo htmlspecialchars($music['song_path']); ?>" type="audio/mpeg">
+                            <source src="<?= htmlspecialchars($music['song_path']); ?>" type="audio/mpeg">
                             Your browser does not support the audio element.
                         </audio>
                     </div>
