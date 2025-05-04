@@ -28,6 +28,9 @@ data:
     if (empty($all_music)) {
         die("<div class='error'>No songs found in the database.</div>");
     }
+
+    $music = $all_music[0];
+    ?>
     
     <!DOCTYPE html>
     <html lang="en">
