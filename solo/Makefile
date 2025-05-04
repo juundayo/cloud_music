@@ -7,7 +7,7 @@ deploy:
 	kubectl apply -f 03-pvc.yaml
 	kubectl apply -f 04-postgres.yaml
 	kubectl wait --for=condition=Ready pod/postgres
-	kubectl cp music/. postgres:/music
+	kubectl cp music/. postgres:/songs
 	kubectl apply -f 05-postgres-service.yaml
 	kubectl apply -f 06-web-content-configmap.yaml
 	kubectl apply -f 07-webserver.yaml
