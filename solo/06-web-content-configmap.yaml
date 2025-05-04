@@ -244,10 +244,15 @@ data:
                     </div>
                     
                     <div class="player-controls">
-                        <audio controls>
-                            <source src="<?= htmlspecialchars($music['song_path']); ?>" type="audio/mpeg">
-                            Your browser does not support the audio element.
-                        </audio>
+                        <?php if (file_exists($_SERVER['DOCUMENT_ROOT'] . $music['song_path'])): ?>
+                            <audio controls>
+                                <source src="<?= htmlspecialchars($music['song_path']) ?>" type="audio/mpeg">
+                            </audio>
+                        <?php else: ?>
+                            <div class="error" style="color: #ff6b6b;">
+                                SONG NOT FOUND AT: <?= htmlspecialchars($music['song_path']) ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                     
                     <div class="lyrics">
