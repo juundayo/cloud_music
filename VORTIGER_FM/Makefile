@@ -27,7 +27,7 @@ clean:
 	-kubectl delete -f 01-secret.yaml
 	@echo "✅ Cleanup complete."
 
-deployploy:
+deploy_dist:
 	@echo "🚀 Deploying Kubernetes PostgreSQL + Web Server setup..."
 	kubectl apply -f 01-secret.yaml
 	kubectl apply -f 02-configmap.yaml
@@ -42,7 +42,7 @@ deployploy:
 	kubectl apply -f 08-webserver-service.yaml
 	@echo "✅ Deployment complete."
 
-cleanclean:
+clean_dist:
 	@echo "🧹 Cleaning up Kubernetes PostgreSQL + Web Server setup..."
 	-kubectl delete -f 08-webserver-service.yaml
 	-kubectl delete -f 09-webserver-deployment.yaml

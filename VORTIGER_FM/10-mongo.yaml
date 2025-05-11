@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb
+spec:
+  selector:
+    matchLabels:
+      app: mongodb # has to match .spec.template.metadata.labels
+  serviceName: "mongo"
+  replicas: 3 # by default is 1
+  template:
+    metadata:
+      labels:
+        app: mongodb # has to match .spec.selector.matchLabels
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:4.0.17
+        ports:
+        - containerPort: 27017
+          name: mongodb
+        volumeMounts:
+        - name: mongo-pvc
+          mountPath: /data/mongo
+  volumeClaimTemplates:
+  - metadata:
+      name: mongo-pvc
+    spec:
+      accessModes: 
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+
+
+---
+apiVersion: v1
+kind: Service 
+metadata: 
+  name: mongodb
+  labels:
+    app: mongodb
+spec:
+  clusterIP: None
+  selector: 
+    app: mongodb
+  ports: 
+    - port: 27017
+      targetPort: 27017
