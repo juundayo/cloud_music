@@ -43,12 +43,12 @@ spec:
         volumeMounts:
         - name: web-content
           mountPath: /app
-        - name: music-data
-          mountPath: /app/music
+        resources:
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 200m
       volumes:
       - name: web-content
         configMap:
           name: web-content
-      - name: music-data
-        persistentVolumeClaim:
-          claimName: postgres-pvc
