@@ -1,0 +1,29 @@
+# Start from an official PHP image
+FROM php:8.2-cli
+
+# Install system dependencies for MongoDB and Composer
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    libssl-dev \
+    pkg-config \
+    libcurl4-openssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install MongoDB extension via PECL and enable it
+RUN pecl install mongodb \
+    && docker-php-ext-enable mongodb
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Set working directory
+WORKDIR /app
+
+# Optionally copy your PHP app into the image
+# COPY . /app
+
+# Install PHP dependencies via Composer
+# RUN composer install
+
+CMD ["php", "-a"]  # Or replace with "php /app/index.php" for running a file

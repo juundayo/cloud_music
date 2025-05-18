@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: web
-        image: webdevops/php-apache:8.1
+        image: panaghs01/my-php-k8s:2.0
         ports:
         - containerPort: 80
         env:
