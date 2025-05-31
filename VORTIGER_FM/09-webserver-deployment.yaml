@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: webserver
   labels:
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: web
-        image: panaghs01/my-php-k8s:2.0
+        image: webdevops/php-apache:8.1
         ports:
         - containerPort: 80
         env:
@@ -43,12 +43,27 @@ spec:
         volumeMounts:
         - name: web-content
           mountPath: /app
+        - name: songs
+          mountPath: /songs
         resources:
           limits:
             cpu: 500m
           requests:
             cpu: 200m
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/sh", "-c", "kubectl cp webserver-0:~/kid.txt ./kid"]
       volumes:
-      - name: web-content
-        configMap:
-          name: web-content
+        - name: web-content
+          configMap:
+            name: web-content
+      
+  volumeClaimTemplates:
+  - metadata:
+      name: songs
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 150Mi
