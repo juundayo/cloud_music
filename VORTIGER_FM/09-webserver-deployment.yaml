@@ -25,10 +25,10 @@ spec:
             echo "Waiting for data-source..." && \
             until nc -z data-source 873; do sleep 1; done && \
             echo "Syncing data..." && \
-            rsync -av rsync://data-source/songs/ /songs/
+            rsync -av rsync://data-source/songs/ /app/songs/
         volumeMounts:
         - name: songs
-          mountPath: /songs
+          mountPath: /app/songs
       containers:
       - name: web
         image: panaghs01/php-rsync
@@ -59,7 +59,7 @@ spec:
         - name: web-content
           mountPath: /app
         - name: songs
-          mountPath: /songs
+          mountPath: /app/songs
         resources:
           limits:
             cpu: 500m
