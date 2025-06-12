@@ -5,7 +5,7 @@ metadata:
 data:
   index.php: |
     <?php
-
+    session_start();
     $host = getenv("DB_HOST");
     $db = getenv("DB_NAME");
     $user = getenv("DB_USER");
@@ -18,19 +18,51 @@ data:
         exit;
     }
 
-    $music_result = pg_query($conn, "SELECT * FROM music_data");
+    // Handling search.
+    $search_query = isset($_GET['search']) ? $_GET['search'] : '';
+    $where_clause = '';
+    if (!empty($search_query)) {
+        $search_query = pg_escape_string($conn, $search_query);
+        $where_clause = "WHERE artist ILIKE '%$search_query%' OR song_name ILIKE '%$search_query%'";
+    }
+
+    // Handling login/signup.
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (isset($_POST['login'])) {
+            $name = pg_escape_string($conn, $_POST['name']);
+            $result = pg_query($conn, "SELECT * FROM customer_data WHERE name = '$name'");
+            if (pg_num_rows($result) > 0) {
+                $_SESSION['user'] = $name;
+            }
+        } elseif (isset($_POST['signup'])) {
+            $name = pg_escape_string($conn, $_POST['name']);
+            pg_query($conn, "INSERT INTO customer_data (name) VALUES ('$name')");
+            $_SESSION['user'] = $name;
+        } elseif (isset($_POST['logout'])) {
+            session_destroy();
+            header("Location: ".$_SERVER['PHP_SELF']);
+            exit;
+        }
+    }
+
+    // Getting music data.
+    if (empty($search_query)) {
+        // Show 3 random songs on home page
+        $music_result = pg_query($conn, "SELECT * FROM music_data ORDER BY RANDOM() LIMIT 3");
+    } else {
+        // Show search results
+        $music_result = pg_query($conn, "SELECT * FROM music_data $where_clause");
+    }
+
     if (!$music_result) {
         die("<div class='error'>Query failed: " . pg_last_error($conn) . "</div>");
     }
     
-    // Fetching all the rows.
     $all_music = pg_fetch_all($music_result);
     
     if (empty($all_music)) {
-        die("<div class='error'>No songs found in the database.</div>");
+        echo "<div class='error'>No songs found".(!empty($search_query) ? " for '$search_query'" : "")."</div>";
     }
-
-    $music = $all_music[0];
     ?>
     
     <!DOCTYPE html>
@@ -39,6 +71,7 @@ data:
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>VortigerFM</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         <style>
             :root {
                 --primary: #1DB954;
@@ -67,6 +100,7 @@ data:
             header {
                 text-align: center;
                 margin-bottom: 3rem;
+                position: relative;
             }
             
             h1 {
@@ -76,6 +110,12 @@ data:
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
                 text-shadow: 0 0 20px rgba(29, 185, 84, 0.3);
+                cursor: pointer;
+                display: inline-block;
+            }
+            
+            h1:hover {
+                text-shadow: 0 0 30px rgba(29, 185, 84, 0.5);
             }
             
             h2 {
@@ -88,13 +128,157 @@ data:
                 text-align: center;
             }
             
+            /* Auth Buttons */
+            .auth-container {
+                position: absolute;
+                top: 0;
+                right: 0;
+            }
+            
+            .auth-form {
+                display: none;
+                position: absolute;
+                right: 0;
+                top: 100%;
+                background-color: var(--dark-grey);
+                padding: 1.5rem;
+                border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                z-index: 100;
+                width: 250px;
+            }
+            
+            .auth-form.active {
+                display: block;
+            }
+            
+            .auth-form input {
+                width: 100%;
+                padding: 0.8rem;
+                margin-bottom: 1rem;
+                border-radius: 4px;
+                border: none;
+                background-color: var(--light-grey);
+                color: var(--text);
+            }
+            
+            .auth-form button {
+                width: 100%;
+                padding: 0.8rem;
+                border-radius: 20px;
+                font-weight: 600;
+                cursor: pointer;
+                border: none;
+                background-color: var(--primary);
+                color: var(--dark);
+            }
+            
+            .auth-form button:hover {
+                background-color: #1ed760;
+            }
+            
+            .auth-buttons {
+                display: flex;
+                gap: 1rem;
+            }
+            
+            .auth-btn {
+                padding: 0.5rem 1.5rem;
+                border-radius: 20px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                border: none;
+                font-size: 0.9rem;
+            }
+            
+            .login-btn {
+                background-color: transparent;
+                color: var(--text);
+                border: 1px solid var(--text-secondary);
+            }
+            
+            .login-btn:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                border-color: var(--text);
+            }
+            
+            .signup-btn {
+                background-color: var(--primary);
+                color: var(--dark);
+            }
+            
+            .signup-btn:hover {
+                background-color: #1ed760;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(29, 185, 84, 0.3);
+            }
+            
+            .user-info {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }
+            
+            .user-name {
+                color: var(--primary);
+                font-weight: 600;
+            }
+            
+            /* Search Bar */
+            .search-container {
+                display: flex;
+                justify-content: center;
+                margin: 2rem 0;
+                width: 100%;
+            }
+            
+            .search-bar {
+                position: relative;
+                width: 100%;
+                max-width: 600px;
+            }
+            
+            .search-input {
+                width: 100%;
+                padding: 0.8rem 1rem 0.8rem 3rem;
+                border-radius: 25px;
+                border: none;
+                background-color: var(--light-grey);
+                color: var(--text);
+                font-size: 1rem;
+                outline: none;
+                transition: all 0.3s ease;
+            }
+            
+            .search-input:focus {
+                background-color: var(--dark-grey);
+                box-shadow: 0 0 0 2px var(--primary);
+            }
+            
+            .search-icon {
+                position: absolute;
+                left: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--text-secondary);
+            }
+            
+            /* Music Grid */
+            .music-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+                gap: 2rem;
+            }
+            
+            /* Music player styles */
             .music-player {
                 background-color: var(--dark-grey);
                 border-radius: 10px;
                 padding: 2rem;
                 box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
                 transition: transform 0.3s ease;
-                margin-bottom: 2rem;
+                margin-bottom: 0;
             }
             
             .music-player:hover {
@@ -220,47 +404,123 @@ data:
     <body>
         <div class="container">
             <header>
-                <h1>Welcome to VortigerFM</h1>
+                <div class="auth-container">
+                    <?php if (isset($_SESSION['user'])): ?>
+                        <div class="user-info">
+                            <span class="user-name"><?php echo htmlspecialchars($_SESSION['user']); ?></span>
+                            <form method="post">
+                                <button type="submit" name="logout" class="auth-btn signup-btn">Logout</button>
+                            </form>
+                        </div>
+                    <?php else: ?>
+                        <div class="auth-buttons">
+                            <button class="auth-btn login-btn" onclick="toggleForm('login-form')">Log In</button>
+                            <button class="auth-btn signup-btn" onclick="toggleForm('signup-form')">Sign Up</button>
+                        </div>
+                        
+                        <div id="login-form" class="auth-form">
+                            <form method="post">
+                                <input type="text" name="name" placeholder="Username" required>
+                                <button type="submit" name="login">Log In</button>
+                            </form>
+                        </div>
+                        
+                        <div id="signup-form" class="auth-form">
+                            <form method="post">
+                                <input type="text" name="name" placeholder="Username" required>
+                                <button type="submit" name="signup">Sign Up</button>
+                            </form>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                
+                <h1 onclick="window.location.href='/'">Welcome to VortigerFM</h1>
+                
+                <form class="search-container" method="get" action="/">
+                    <div class="search-bar">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-input" name="search" placeholder="Search for songs or artists..." 
+                               value="<?php echo htmlspecialchars($search_query); ?>">
+                    </div>
+                </form>
             </header>
             
             <section>
-                <h2>Now Trending</h2>
+                <h2><?php echo empty($search_query) ? "Now Trending" : "Search Results"; ?></h2>
                 
-                <div class="music-player">
-                    <div class="song-info">
-                        <div class="song-cover">🎵</div>
-                        <div class="song-details">
-                            <h3 class="song-title"><?php echo htmlspecialchars($music['song_name']); ?></h3>
-                            <p class="song-artist"><?php echo htmlspecialchars($music['artist']); ?></p>
-                            <span class="song-genre"><?php echo htmlspecialchars($music['genre']); ?></span>
-                        </div>
-                    </div>
-                    
-                    <div class="wave">
-                        <div class="wave-line"></div>
-                        <div class="wave-line"></div>
-                        <div class="wave-line"></div>
-                        <div class="wave-line"></div>
-                        <div class="wave-line"></div>
-                    </div>
-                    
-                    <div class="player-controls">
-                        <?php if (file_exists($_SERVER['DOCUMENT_ROOT'] . $music['song_path'])): ?>
-                            <audio controls>
-                                <source src="<?= htmlspecialchars($music['song_path']) ?>" type="audio/mpeg">
-                            </audio>
-                        <?php else: ?>
-                            <div class="error" style="color: #ff6b6b;">
-                                SONG NOT FOUND AT: <?= htmlspecialchars($music['song_path']) ?>
+                <div class="music-grid">
+                    <?php if (!empty($all_music)): ?>
+                        <?php foreach ($all_music as $music): ?>
+                            <div class="music-player">
+                                <div class="song-info">
+                                    <div class="song-cover">🎵</div>
+                                    <div class="song-details">
+                                        <h3 class="song-title"><?php echo htmlspecialchars($music['song_name']); ?></h3>
+                                        <p class="song-artist"><?php echo htmlspecialchars($music['artist']); ?></p>
+                                        <span class="song-genre"><?php echo htmlspecialchars($music['genre']); ?></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="wave">
+                                    <div class="wave-line"></div>
+                                    <div class="wave-line"></div>
+                                    <div class="wave-line"></div>
+                                    <div class="wave-line"></div>
+                                    <div class="wave-line"></div>
+                                </div>
+                                
+                                <div class="player-controls">
+                                    <?php if (file_exists($_SERVER['DOCUMENT_ROOT'] . $music['song_path'])): ?>
+                                        <audio controls>
+                                            <source src="<?= htmlspecialchars($music['song_path']) ?>" type="audio/mpeg">
+                                        </audio>
+                                    <?php else: ?>
+                                        <div class="error" style="color: #ff6b6b;">
+                                            SONG NOT FOUND AT: <?= htmlspecialchars($music['song_path']) ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <div class="lyrics">
+                                    <?php echo htmlspecialchars($music['lyrics']); ?>
+                                </div>
                             </div>
-                        <?php endif; ?>
-                    </div>
-                    
-                    <div class="lyrics">
-                        <?php echo htmlspecialchars($music['lyrics']); ?>
-                    </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </section>
         </div>
+        
+        <script>
+            function toggleForm(formId) {
+                // Hide all forms first
+                document.querySelectorAll('.auth-form').forEach(form => {
+                    form.classList.remove('active');
+                });
+                
+                // Show the selected form
+                const form = document.getElementById(formId);
+                if (form) {
+                    form.classList.add('active');
+                    
+                    // Closing when clicking outside.
+                    setTimeout(() => {
+                        document.addEventListener('click', function closeForm(e) {
+                            if (!form.contains(e.target) {
+                                form.classList.remove('active');
+                                document.removeEventListener('click', closeForm);
+                            }
+                        });
+                    }, 10);
+                }
+            }
+            
+            // Auto-submit the search when pressing enter.
+            document.querySelector('.search-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    this.form.submit();
+                }
+            });
+        </script>
     </body>
     </html>
