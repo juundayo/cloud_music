@@ -20,4 +20,12 @@ data:
     INSERT INTO music_data (artist, genre, lyrics, song_name, song_path) VALUES
       ('Ozaki Kiyohiko', 'Ballad',
        'LYRICSAAAAAAAAAAA',
-       'Ima Ima Ima', '/songs/ching.mp3');
+       'Ima Ima Ima', '/songs/ching.mp3'),
+       ('Sabaton', 'Power Metal',
+       'a', 'Ghost Division','/songs/ghost_division.mp3'),
+       ('Chris Christodoulou', 'Electric',
+       'a','...con lentitud poderosa','/songs/con_lentitud_poderosa.mp3'),
+       ('Hello Sleepwalker', 'J-Rock',
+       'a','evening rendezvous','/songs/hello_sleepwalkers.mp3'),
+       ('Powerwolf','Power Metal',
+       'a','Armata strigoi', '/songs/armata_strigoi.mp3');
