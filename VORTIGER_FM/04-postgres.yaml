@@ -30,9 +30,6 @@ spec:
     - name: postgres-storage
       mountPath: /var/lib/postgresql/data
       subPath: pg_data
-    - name: postgres-storage
-      mountPath: /songs
-      subPath: songs
     - name: init-sql
       mountPath: /docker-entrypoint-initdb.d
   volumes:

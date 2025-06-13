@@ -4,11 +4,14 @@ metadata:
   name: init-sql-script
 data:
   init.sql: |
+    CREATE EXTENSION pgcrypto ;
     CREATE TABLE IF NOT EXISTS customer_data (
       id SERIAL PRIMARY KEY,
-      name TEXT NOT NULL
+      name TEXT NOT NULL,
+      password VARCHAR(100)
     );
-    INSERT INTO customer_data (name) VALUES ('Alice'), ('Bob'), ('Charlie');
+
+    INSERT INTO customer_data (name,password) VALUES ('pelekanos',crypt('badcameram@n!!!', gen_salt('md5')));
     CREATE TABLE IF NOT EXISTS music_data (
       id SERIAL PRIMARY KEY,
       artist TEXT NOT NULL,
@@ -20,12 +23,12 @@ data:
     INSERT INTO music_data (artist, genre, lyrics, song_name, song_path) VALUES
       ('Ozaki Kiyohiko', 'Ballad',
        'LYRICSAAAAAAAAAAA',
-       'Ima Ima Ima', '/songs/ching.mp3'),
+       'Ima Ima Ima', '/songs/ima_ima_ima.mp3'),
        ('Sabaton', 'Power Metal',
        'a', 'Ghost Division','/songs/ghost_division.mp3'),
        ('Chris Christodoulou', 'Electric',
        'a','...con lentitud poderosa','/songs/con_lentitud_poderosa.mp3'),
        ('Hello Sleepwalker', 'J-Rock',
-       'a','evening rendezvous','/songs/hello_sleepwalkers.mp3'),
+       'a','evening rendezvous','/songs/hello_sleepwalker.mp3'),
        ('Powerwolf','Power Metal',
        'a','Armata strigoi', '/songs/armata_strigoi.mp3');
