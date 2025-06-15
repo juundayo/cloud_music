@@ -16,19 +16,17 @@ data:
       id SERIAL PRIMARY KEY,
       artist TEXT NOT NULL,
       genre TEXT NOT NULL,
-      lyrics TEXT NOT NULL,
       song_name TEXT NOT NULL,
       song_path TEXT NOT NULL
     );
     INSERT INTO music_data (artist, genre, lyrics, song_name, song_path) VALUES
       ('Ozaki Kiyohiko', 'Ballad',
-       'LYRICSAAAAAAAAAAA',
        'Ima Ima Ima', '/songs/ima_ima_ima.mp3'),
        ('Sabaton', 'Power Metal',
-       'a', 'Ghost Division','/songs/ghost_division.mp3'),
+       'Ghost Division','/songs/ghost_division.mp3'),
        ('Chris Christodoulou', 'Electric',
-       'a','...con lentitud poderosa','/songs/con_lentitud_poderosa.mp3'),
+       '...con lentitud poderosa', '/songs/con_lentitud_poderosa.mp3'),
        ('Hello Sleepwalker', 'J-Rock',
-       'a','evening rendezvous','/songs/hello_sleepwalker.mp3'),
-       ('Powerwolf','Power Metal',
-       'a','Armata strigoi', '/songs/armata_strigoi.mp3');
+       'evening rendezvous', '/songs/hello_sleepwalker.mp3'),
+       ('Powerwolf', 'Power Metal',
+       'Armata strigoi', '/songs/armata_strigoi.mp3');
