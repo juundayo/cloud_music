@@ -30,17 +30,41 @@ data:
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_POST['login'])) {
             $name = pg_escape_string($conn, $_POST['name']);
-            $result = pg_query($conn, "SELECT * FROM customer_data WHERE name = '$name'");
-            if (pg_num_rows($result) > 0) {
-                $_SESSION['user'] = $name;
+            $password = pg_escape_string($conn, $_POST['password']);
+
+            $query = "SELECT (password = crypt('$password', password)) AS password_match 
+                    FROM customer_data 
+                    WHERE name = '$name'";
+            $result = pg_query($conn, $query);
+
+            if ($result && pg_num_rows($result) > 0) {
+                $row = pg_fetch_assoc($result);
+                if ($row['password_match'] === 't') { // PostgreSQL returns 't' for true
+                    $_SESSION['user'] = $name;
+                } else {
+                    echo "Incorrect password.";
+                }
+            } else {
+                echo "User not found.";
             }
+
         } elseif (isset($_POST['signup'])) {
             $name = pg_escape_string($conn, $_POST['name']);
-            pg_query($conn, "INSERT INTO customer_data (name) VALUES ('$name')");
-            $_SESSION['user'] = $name;
+            $password = pg_escape_string($conn, $_POST['password']);
+
+            $query = "INSERT INTO customer_data (name, password) 
+                    VALUES ('$name', crypt('$password', gen_salt('md5')))";
+            $result = pg_query($conn, $query);
+
+            if ($result) {
+                $_SESSION['user'] = $name;
+            } else {
+                echo "Signup failed. User may already exist.";
+            }
+
         } elseif (isset($_POST['logout'])) {
             session_destroy();
-            header("Location: ".$_SERVER['PHP_SELF']);
+            header("Location: " . $_SERVER['PHP_SELF']);
             exit;
         }
     }
