@@ -70,27 +70,33 @@ data:
         }
     }
 
-    // Getting music data.
+    // Getting music data for main content.
     if (empty($search_query)) {
-        // Show 3 random songs on home page
         $music_result = pg_query($conn, "SELECT * FROM music_data ORDER BY RANDOM() LIMIT 3");
     } else {
-        // Show search results
         $music_result = pg_query($conn, "SELECT * FROM music_data $where_clause");
     }
-
+    
     if (!$music_result) {
         die("<div class='error'>Query failed: " . pg_last_error($conn) . "</div>");
     }
     
+    // Store main content results immediately
     $all_music = pg_fetch_all($music_result);
     
-    // Get all songs for the sidebar
+    // Now get all songs for sidebar (separate query)
     $all_songs_result = pg_query($conn, "SELECT song_name, artist FROM music_data ORDER BY artist, song_name");
     $all_songs = pg_fetch_all($all_songs_result);
     
     if (empty($all_music)) {
         echo "<div class='error'>No songs found".(!empty($search_query) ? " for '$search_query'" : "")."</div>";
+    }
+
+    if (!$all_songs_result) {
+        error_log("!!!!!!!!Sidebar query failed: " . pg_last_error($conn));
+        $all_songs = []; // Set empty array if query fails
+    } else {
+        $all_songs = pg_fetch_all($all_songs_result) ?: [];
     }
     ?>
     
