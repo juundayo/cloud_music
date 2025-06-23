@@ -71,14 +71,20 @@ data:
     }
 
     // Getting music data for main content.
-    if (empty($search_query)) {
-        $music_result = pg_query($conn, "SELECT * FROM music_data ORDER BY RANDOM() LIMIT 3");
-    } else {
-        $music_result = pg_query($conn, "SELECT * FROM music_data $where_clause");
-    }
+    $trending_result = pg_query($conn, "SELECT * FROM music_data ORDER BY RANDOM() LIMIT 3");
+    $trending_songs = pg_fetch_all($trending_result);
     
-    if (!$music_result) {
-        die("<div class='error'>Query failed: " . pg_last_error($conn) . "</div>");
+    $search_songs = [];
+    if (!empty($search_query)) {
+        $search_result = pg_query($conn, "SELECT * FROM music_data $where_clause");
+        $search_songs = pg_fetch_all($search_result);
+    }
+
+    // Instead, determine which songs to display
+    if (!empty($search_query)) {
+        $all_music = $search_songs;
+    } else {
+        $all_music = $trending_songs;
     }
     
     // Store main content results immediately
@@ -86,17 +92,16 @@ data:
     
     // Now get all songs for sidebar (separate query)
     $all_songs_result = pg_query($conn, "SELECT song_name, artist FROM music_data ORDER BY artist, song_name");
-    $all_songs = pg_fetch_all($all_songs_result);
-    
-    if (empty($all_music)) {
-        echo "<div class='error'>No songs found".(!empty($search_query) ? " for '$search_query'" : "")."</div>";
-    }
-
     if (!$all_songs_result) {
-        error_log("!!!!!!!!Sidebar query failed: " . pg_last_error($conn));
+        error_log("Sidebar query failed: " . pg_last_error($conn));
         $all_songs = []; // Set empty array if query fails
     } else {
         $all_songs = pg_fetch_all($all_songs_result) ?: [];
+    }
+
+    // Only show "No songs found" for search results
+    if (!empty($search_query) && empty($all_music)) {
+        echo "<div class='error'>No songs found for '$search_query'</div>";
     }
     ?>
     
