@@ -87,7 +87,6 @@ data:
     
     // Get all songs for the sidebar
     $all_songs_result = pg_query($conn, "SELECT song_name, artist FROM music_data ORDER BY artist, song_name");
-    $all_songs = pg_fetch_all($all_songs_result);
     
     $all_songs = [];
     if ($all_songs_result) {
