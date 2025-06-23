@@ -70,39 +70,38 @@ data:
         }
     }
 
-    // Getting music data for main content.
-    $trending_result = pg_query($conn, "SELECT * FROM music_data ORDER BY RANDOM() LIMIT 3");
-    $trending_songs = pg_fetch_all($trending_result);
-    
-    $search_songs = [];
-    if (!empty($search_query)) {
-        $search_result = pg_query($conn, "SELECT * FROM music_data $where_clause");
-        $search_songs = pg_fetch_all($search_result);
+    // Getting music data.
+    if (empty($search_query)) {
+        // Show 3 random songs on home page
+        $music_result = pg_query($conn, "SELECT * FROM music_data ORDER BY RANDOM() LIMIT 3");
+    } else {
+        // Show search results
+        $music_result = pg_query($conn, "SELECT * FROM music_data $where_clause");
     }
 
-    // Instead, determine which songs to display
-    if (!empty($search_query)) {
-        $all_music = $search_songs;
-    } else {
-        $all_music = $trending_songs;
+    if (!$music_result) {
+        die("<div class='error'>Query failed: " . pg_last_error($conn) . "</div>");
     }
     
-    // Store main content results immediately
     $all_music = pg_fetch_all($music_result);
     
-    // Now get all songs for sidebar (separate query)
+    // Get all songs for the sidebar
     $all_songs_result = pg_query($conn, "SELECT song_name, artist FROM music_data ORDER BY artist, song_name");
-    if (!$all_songs_result) {
-        error_log("Sidebar query failed: " . pg_last_error($conn));
-        $all_songs = []; // Set empty array if query fails
+    $all_songs = pg_fetch_all($all_songs_result);
+    
+    $all_songs = [];
+    if ($all_songs_result) {
+        $all_songs = pg_fetch_all($all_songs_result);
     } else {
-        $all_songs = pg_fetch_all($all_songs_result) ?: [];
+        echo "<div class='error'>Sidebar query failed: " . pg_last_error($conn) . "</div>";
     }
-
-    // Only show "No songs found" for search results
-    if (!empty($search_query) && empty($all_music)) {
-        echo "<div class='error'>No songs found for '$search_query'</div>";
+    
+    /*
+    if (empty($all_music)) {
+        echo "<div class='error'>No songs found".(!empty($search_query) ? " for '$search_query'" : "")."</div>";
     }
+    */
+    
     ?>
     
     <!DOCTYPE html>
@@ -676,7 +675,7 @@ data:
                 }
             });
             
-            // Auto-hiding error message after animation.
+            // Auto-hide error message after animation
             const errorMessage = document.getElementById('error-message');
             if (errorMessage) {
                 setTimeout(() => {
