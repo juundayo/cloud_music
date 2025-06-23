@@ -19,7 +19,7 @@ data:
       song_name TEXT NOT NULL,
       song_path TEXT NOT NULL
     );
-    INSERT INTO music_data (artist, genre, lyrics, song_name, song_path) VALUES
+    INSERT INTO music_data (artist, genre, song_name, song_path) VALUES
       ('Ozaki Kiyohiko', 'Ballad',
        'Ima Ima Ima', '/songs/ima_ima_ima.mp3'),
        ('Sabaton', 'Power Metal',

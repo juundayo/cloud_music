@@ -83,7 +83,7 @@ data:
     }
     
     $all_music = pg_fetch_all($music_result);
-    
+    echo "<pre>Fetched Music: " . print_r($all_music, true) . "</pre>";
     if (empty($all_music)) {
         echo "<div class='error'>No songs found".(!empty($search_query) ? " for '$search_query'" : "")."</div>";
     }
@@ -367,17 +367,6 @@ data:
                 background-color: var(--light-grey);
             }
             
-            .lyrics {
-                margin-top: 2rem;
-                padding: 1.5rem;
-                background-color: rgba(0, 0, 0, 0.3);
-                border-radius: 8px;
-                white-space: pre-line;
-                line-height: 1.8;
-                font-size: 0.95rem;
-                color: var(--text-secondary);
-            }
-            
             .wave {
                 height: 50px;
                 display: flex;
@@ -505,10 +494,6 @@ data:
                                             SONG NOT FOUND AT: <?= htmlspecialchars($music['song_path']) ?>
                                         </div>
                                     <?php endif; ?>
-                                </div>
-                                
-                                <div class="lyrics">
-                                    <?php echo htmlspecialchars($music['lyrics']); ?>
                                 </div>
                             </div>
                         <?php endforeach; ?>
