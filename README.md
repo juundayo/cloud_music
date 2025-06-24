@@ -1,28 +1,3 @@
-# 🌩️ Νεφοϋπολογιστική
+Για το συγκεκριμένο project αναπτύξαμε μία cloud-native εφαρμογή που σερβίρει μουσική σε πελάτες μέσω μίας ιστοσελίδας γραμμένη σε PHP και HTML. Είναι πλήρως scalable με χρήση HPA (Horizontal Pod Autoscaling) και resilient σε πολλαπλά client requests την ίδια χρονική στιγμή. Οι χρήστες της εφαρμογής έχουν την δυνατότητα να φτιάξουν προφίλ ή να κάνουν login με τα credentials τους και να ακούσουν τραγούδια που είναι αποθηκευμένα σε pods και χρησιμοποιούν το rsync ώστε να έχουν σίγουρη διαθεσιμότητα (availability) για όλα τα τραγούδια. Τέλος, τα στοιχεία των πελατών όπως το username και το password, καθώς και οι πληροφορίες για τα τραγούδια όπως ο τίλος και το είδος αποθηκεύονται μέσω SQL ερωτημάτων και την PostGres και χρησιμοποιείται αντίστοιχο encryption για τα passwords των χρηστών μέσω της βιβλιοθήκης pgcrypto και της έννοιας salt.
 
-Καλωσορίσατε στο αποθετήριο του μαθήματος **Νεφοϋπολογιστική** του Τμήματος Πληροφορικής και Τηλεπικοινωνιών του Πανεπιστημίου Θεσσαλίας. Το αποθετήριο αυτό περιέχει:
-
-✅ Παραδείγματα με χρήση Docker & Docker Compose  
-✅ Πλήρη οδηγό για σύνδεση με την υποδομή Kubernetes του εργαστηρίου μέσω OpenVPN  
-✅ Υλοποιήσεις σε Kubernetes: Pods, Deployments, StatefulSets, Volumes, ConfigMaps, Secrets και Services
-✅ Τεκμηρίωση σε μορφή Markdown και Makefile για αυτοματισμούς
-
-## 📁 Δομή Οδηγιών
-
-| Ενότητα | Περιγραφή |
-|--------|-----------|
-| [00_Preparatory-lab](docs/00_Preparatory-lab/) | Ρύθμιση Docker Desktop με WSL2 |
-| [01_lab1-docker](docs/01_lab1-docker/) | Εισαγωγή στο Docker με πρακτικά παραδείγματα |
-| [01_lab1-k8s](docs/01_lab1-k8s/) | Kubernetes, kubectl, k9s, Deployments, PVCs, StatefulSets, Volumes, ConfigMaps, Secrets και Services |
-
-## 🚀 Εκκίνηση
-
-```bash
-git clone https://github.com/ikons/cloud-uth.git
-cd cloud-uth
-```
-
-> 💡 Βεβαιωθείτε ότι έχετε εγκαταστήσει:
-> - Docker Desktop (με WSL2 backend)
-> - OpenVPN Client
-> - `kubectl` και `k9s`
+Για να τρέξει κάποιος αυτή την εφαρμογή, αρχικά θα χρειαστεί ένα namespace σε ένα local cluster. Εάν θέλουμε να είναι στον local cluster του πανεπιστημίου, θα πρέπει να έχει πρόσβαση μέσω vpn στο vd cloud. Έχοντας αποκτήσει το namespace του, μπορεί να τρέξει το make deploy ώστε να τρέξουν όλα τα αρχεία και να δημιουργηθούν: η βάση δεδομένων, το pvc, το website, ο data source node, και να ενεργοποιηθεί ο hpa. Είναι απαραίτητο να έχει κατεβασμένο τον φάκελο music στον υπολογιστή του, έτσι ώστε να δοθούν στον data source μέσω kubectl cp. Έπειτα, μπορεί να μπει στο k9s interface, και πηγαίνοντας στα services, χρησιμοποιώντας svc, να βρει την ip address του service, ώστε να συνδεθεί τοπικά σε αυτή.
